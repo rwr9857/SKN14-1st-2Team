@@ -26,3 +26,6 @@ CREATE TABLE user_info (
     FOREIGN KEY (car_id) REFERENCES car_info(car_id)
 );
 
+
+
+
