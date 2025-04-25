@@ -6,13 +6,13 @@
 
 ## 👥 팀원 소개
 
-| 이름  | 역할 | 담당 업무 |
-|-----|-----|-|
-| 김의령 | (추후 기입) | (추후 기입) |
-| 김준기 | (추후 기입) | (추후 기입) |
-| 윤이서 | (추후 기입) | (추후 기입) |
-| 조성렬 | (추후 기입) | (추후 기입) |
-| 한성규 | (추후 기입) | (추후 기입) |
+| 캐릭터 | 이름  | 역할 | 담당 업무 |
+|:-----:|:-----:|:-----:|-----|
+| ![](./images/euiyoung.png) | 김의령 |추후 기입|추후 기입|
+| ![](./images/junki.png)    | 김준기 |추후 기입|추후 기입|
+| ![](./images/iseo.png)     | 윤이서 |추후 기입|추후 기입|
+| ![](./images/sungryul.png) | 조성렬 |추후 기입|추후 기입|
+| ![](./images/sungkyu.png)  | 한성규 |추후 기입|추후 기입|
 
 
 ---
@@ -46,12 +46,12 @@
 ## 2-2. 🛠️ 기술 스택
 
 
-| 분류 | 기술/도구                                                                                                                                                                                                       |
-|------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 언어 | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)                                                                                                       |
-| 라이브러리 | ..                                                                                                                                                                                                          |
-| 데이터베이스 | ..                                                                                                                                                                                                          |
-| 웹 | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)                                                                                              |
+| 분류 | 기술/도구                                                                                                               |
+|------|---------------------------------------------------------------------------------------------------------------------|
+| 언어 | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)               |
+| 라이브러리 | ![BeautifulSoup](https://img.shields.io/badge/BeautifulSoup-4B8BBE?style=for-the-badge&logo=python&logoColor=white) |
+| 데이터베이스 | ..                                                                                                                  |
+| 웹 | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)      |
 | 협업 툴 | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white),![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white),![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)|
 
 
@@ -67,20 +67,30 @@
 
 - 추후 기입 예정
 
-## 2-6. 🧩 ERD
+## 2-6. 📊 플로우차트 (FlowChart)
+
+![](./FlowChart.jpg)
+
+## 2-7. 🧩 ERD
 
 - 추후 기입 예정
 
 ---
 
-# 3. 사용 방법
+# 3. 💡사용 방법
 
-- 추후 기입 예정 (예: 설치 방법, 실행 명령어, 환경 설정 등)
+- 추후 기입 예정 (시연영상 삽입)
 
 ---
 
 # 4. 🕊️ 회고
 
 - 프로젝트 진행 후 느낀 점 및 개선 사항 (추후 기입 예정)
+
+---
+
+# 5. ☑️ 피드백
+
+- 개선 사항 (추후 기입 예정)
 
 ---
