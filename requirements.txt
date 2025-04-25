@@ -1,0 +1,6 @@
+black
+streamlit
+mysql-connector-python
+python-dotenv
+selenium
+beautifulsoup4
