@@ -1,12 +1,11 @@
 
 CREATE DATABASE teamdb;
 
-<<<<<<< HEAD
 show databases;
 
 show schemas;
 
-select user, host from user;
+# select user, host from user;
 
 create user 'ryunnng'@'%' identified  by 'df1462';
 grant all privileges on teamdb.* to 'ryunnng'@'%';
@@ -73,21 +72,6 @@ create table user_info (
     user_gender varchar(10) not null check (user_gender in ('남', '여')),
     car_id int not null,
     foreign key (car_id) references car_info(car_id)
-=======
-CREATE TABLE car_info (
-    car_id INT NOT NULL AUTO_INCREMENT,
-    car_model VARCHAR(100),
-    car_body_type VARCHAR(100),
-    car_fuel_type VARCHAR(100),
-    car_price INT,
-    car_horsepower INT,
-    car_engine_type VARCHAR(20),
-    car_fuel_efficiency VARCHAR(100),
-    car_size VARCHAR(50),
-    car_img_url VARCHAR(100),
-    car_brand VARCHAR(50),
-    PRIMARY KEY (car_id)
->>>>>>> 52209cb24a6067dc493b4eef3e2e71e65578ed15
 );
 
 
