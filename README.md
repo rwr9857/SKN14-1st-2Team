@@ -69,7 +69,7 @@
 
 ## 2-6. 📊 플로우차트 (FlowChart)
 
-![](./FlowChart.jpg)
+![](./docs/FlowChart.jpg)
 
 ## 2-7. 🧩 ERD
 
