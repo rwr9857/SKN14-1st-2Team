@@ -1,6 +1,5 @@
 CREATE DATABASE teamdb;
 
-
 CREATE TABLE car_info (
     car_id INT NOT NULL AUTO_INCREMENT,
     car_model VARCHAR(100),

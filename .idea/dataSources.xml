@@ -8,13 +8,6 @@
       <jdbc-url>jdbc:mysql://localhost:3306</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="car_recommendation" uuid="9b7d856c-c52c-4289-b2f5-457e4e76b2b9">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Workspaces\SKN14_1st_2Team\car_recommendation.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
     <data-source source="LOCAL" name="skn14@localhost" uuid="6a40358d-4937-47c8-ac44-82d35034abde">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>

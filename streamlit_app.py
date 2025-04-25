@@ -1,12 +1,12 @@
 import streamlit as st
-import sqlite3
 from streamlit_option_menu import option_menu
-import pandas as pd
+import sqlite3
+import base64
 
-
-# --- DB 연결 ---
+# --- 데이터베이스 초기화 함수 ---
 def init_db():
     conn = sqlite3.connect('teamdb')
+    conn.execute("PRAGMA foreign_keys = ON;")  # FK 활성화 추가
     cur = conn.cursor()
 
     cur.execute('''
@@ -27,7 +27,7 @@ def init_db():
 
     cur.execute('''
         CREATE TABLE IF NOT EXISTS user_info (
-            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER PRIMARY KEY,  -- AUTOINCREMENT 삭제 (자동증가 기본적용)
             user_age INTEGER,
             user_gender TEXT,
             car_id INTEGER,
@@ -38,22 +38,36 @@ def init_db():
     conn.commit()
     return conn
 
+# --- 배경 이미지 설정 함수 (Base64) ---
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
 
-# --- 스타일 설정 (Inter 폰트 + 기본 스타일) ---
+def set_background(png_file):
+    bin_str = get_base64_of_bin_file(png_file)
+    page_bg_img = f'''
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{bin_str}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }}
+    </style>
+    '''
+    st.markdown(page_bg_img, unsafe_allow_html=True)
+
+# DB 연결 (앱 시작할 때)
+conn = init_db()
+
+# --- 스타일 설정 (폰트 등) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
 
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
-    }
-
-    .price-card {
-        background-color: #FFE4B5;
-        border-radius: 20px;
-        padding: 30px;
-        margin-top: 20px;
-        text-align: center;
     }
 
     .center-button {
@@ -76,103 +90,83 @@ st.markdown("""
     .styled-button:hover {
         background-color: #45a049;
     }
-
-    .stApp {
-        background-image: url("docs/차근차근_배경화면.jpg"); /* 경로 확인 */
-        background-attachment: fixed;
-        background-size: cover;
-        background-position: center;
-    }
-
     </style>
 """, unsafe_allow_html=True)
 
-# --- 로고 삽입 ---
-# 로고 넣기
-logo_path = "docs/차근차근_로고.png"  # 업로드된 첫 이미지 파일 이름
-st.image("docs/차근차근_로고.png", width=150)
+# --- 배경 이미지 적용 ---
+set_background('docs/background.png')
 
-# --- 첫 화면 ---
+# --- 로고 삽입 ---
+st.image("docs/logo.png", width=150)
+
+# --- 페이지 상태관리 ---
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
+# --- 메인화면 ---
 if st.session_state.page == "home":
-    st.markdown("<h1>당신의 첫 차,</h1>", unsafe_allow_html=True)
-    st.markdown("<h1>차근차근 함께 찾아요</h1>", unsafe_allow_html=True)
+    st.markdown("<h1>당신의 첫 차, 차근차근 함께 찾아요</h1>", unsafe_allow_html=True)
     st.write("나에게 맞는 첫 차를 3분 만에 찾아드립니다.")
 
-    # 스타일이 적용된 버튼을 가운데에 배치
     with st.container():
         st.markdown('<div class="center-button">', unsafe_allow_html=True)
-        if st.button("찾으러 가기", key="styled-button"):
-            st.session_state.page = "budget"
+        if st.button("찾으러 가기", key="start_button"):
+            st.session_state.page = "balance"
         st.markdown('</div>', unsafe_allow_html=True)
 
-# 상단 탭 메뉴
-selected = option_menu(
-    menu_title=None,
-    options=["기본 정보","예산 범위", "엔진 타입", "바디타입", "용도체크", "선호도"],
-    icons=["info-circle", "cash-coin", "ev-station", "car-front-fill", "clipboard-check", "heart"],
-    orientation="horizontal",
-    default_index=0,
-    styles={
-        "container": {"padding": "0!important", "background-color": "#F8B94A"},
-        "icon": {"color": "#444", "font-size": "18px"},
-        "nav-link": {"font-size": "16px", "text-align": "center", "margin": "5px"},
-        "nav-link-selected": {"background-color": "#FFCC66"},
-    }
-)
-
-
-# ── “기본 정보” 입력 UI ──
-if selected == "기본 정보":
-    st.header("📝 기본 정보")
-
-    # 나이 입력: 최소20, 최대40, 기본값 20
-    age = st.number_input(
-        label="나이(세)",
-        min_value=20,
-        max_value=40,
-        value=20,
-        step=1,
-        format="%d"
+# --- 밸런스(설문) 화면 ---
+elif st.session_state.page == "balance":
+    selected = option_menu(
+        menu_title=None,
+        options=["예산 범위", "엔진 타입", "바디타입", "용도 체크", "선호도"],
+        icons=["cash-coin", "ev-station", "car-front", "clipboard-check", "heart"],
+        orientation="horizontal",
+        default_index=0,
+        styles={
+            "container": {"padding": "0!important", "background-color": "#F8B94A"},
+            "icon": {"color": "#444", "font-size": "18px"},
+            "nav-link": {"font-size": "16px", "text-align": "center", "margin": "5px"},
+            "nav-link-selected": {"background-color": "#FFCC66"},
+        }
     )
 
-    # 성별 선택: 가로 방향 라디오
-    gender = st.radio(
-        label="성별",
-        options=["남", "여"],
-        horizontal=True
-    )
+    # --- 예산 범위 입력 ---
+    if selected == "예산 범위":
+        st.header("예산 설정")
+        st.write("예산 차량 구매 예산은 어느 정도 생각하고 계신가요?")
 
-    # 용도 선택: 단일 선택만 가능
-    purpose = st.selectbox(
-        label="주 사용 용도",
-        options=["출퇴근", "여행/나들이", "업무용", "주말 드라이브"]
-    )
-
-    # 입력된 값 출력 (디버깅/확인용)
-    st.write(f"▶ 나이: {age}세")
-    st.write(f"▶ 성별: {gender}")
-    st.write(f"▶ 용도: {purpose}")
-
-# 예산 범위 탭
-if selected == "예산 범위":
-    st.markdown("### 예산 차량 구매 예산은 어느 정도 생각하고 계신가요?")
-
-    col1, col2 = st.columns([1,1.3])
-
-    with col1:
-        st.image("docs/예산_아이콘.png", width=100)
-
-    with col2:
-        st.markdown("#### 금액 설정")
         min_val, max_val = st.slider(
-            "구매 예산 범위 설정 (단위: 만 원)",
-            min_value=0,
-            max_value=5000,
-            value=(0, 5000),
-            step=1000,
-            format="%d"
+            "구매 예산 범위 설정 (단위: 만원)",
+            0, 5000, (0, 5000), step=100
         )
         st.write(f"선택한 예산: **{min_val}만원 ~ {max_val}만원**")
+
+    # --- 엔진 타입 선택 ---
+    if selected == "엔진 타입":
+        st.header("엔진 타입 선택")
+        engine = st.selectbox("선호하는 엔진 타입을 선택하세요.", ["가솔린", "디젤", "친환경"])
+        st.write(f"선택한 엔진 타입: **{engine}**")
+
+    # --- 바디타입 선택 ---
+    if selected == "바디타입":
+        st.header("바디타입 선택")
+        body = st.selectbox("선호하는 바디타입을 선택하세요.", ["승용차", "SUV", "경차"])
+        st.write(f"선택한 바디타입: **{body}**")
+
+    # --- 용도 체크 ---
+    if selected == "용도 체크":
+        st.header("차량 사용 용도 체크")
+        purpose = st.radio("주 사용 용도를 선택하세요.", ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"], horizontal=True)
+        st.write(f"선택한 용도: **{purpose}**")
+
+    # --- 선호도 ---
+    if selected == "선호도":
+        st.header("선호도 입력")
+        st.write("특별히 원하는 옵션이나 스타일을 입력해주세요.")
+        preference = st.text_input("예: 연비 좋은 차, 튼튼한 차 등")
+        if preference:
+            st.success(f"입력된 선호도: {preference}")
+
+        if st.button("추천 차량 보기"):
+            st.success("추천 페이지로 이동합니다!")
+            # 향후 추천 차량 페이지 연결 가능
