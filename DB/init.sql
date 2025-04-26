@@ -1,3 +1,5 @@
+grant all privileges on teamdb.* to 'skn14'@'%';
+
 CREATE DATABASE teamdb;
 
 
