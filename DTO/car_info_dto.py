@@ -15,3 +15,4 @@ class CarInfoDTO:
     car_fuel_efficiency: Optional[int] = None
     car_size: Optional[int] = None
     car_img_url: Optional[str] = None
+
