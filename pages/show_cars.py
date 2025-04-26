@@ -1,9 +1,12 @@
+from DAO import car_info_dao
 import streamlit as st
 
 # 페이지 설정
 st.set_page_config(
     page_title="차근차근", layout="centered", initial_sidebar_state="collapsed"
 )
+
+car_info_dao = car_info_dao.CarInfoDAO()
 
 # 상단 로고와 제목
 st.markdown(
@@ -83,6 +86,21 @@ with col:
                 st.image(car["image"], use_container_width=True)
                 st.markdown(f"**{car['name']}**")
                 st.markdown(f"{car['price']}")
+
+if st.button("디비 호출 테스트"):
+    # get_all_cars 메서드 호출
+    cars = car_info_dao.get_all_cars()
+
+    # 결과 출력
+    if cars:
+        for car in cars:
+            # 각 차 정보 출력
+            st.write(f"차량 모델: {car.car_model}")
+            st.write(f"차량 가격: {car.car_price}만원")
+            st.write(f"차량 이미지 URL: {car.car_img_url}")
+            st.write("---")  # 구분선
+    else:
+        st.write("차량 정보가 없습니다.")
 
 # 페이지네이션
 st.markdown("### ")
