@@ -6,9 +6,6 @@ DROP TABLE IF EXISTS BODY_TYPE_INFO;
 DROP TABLE IF EXISTS ENGINE_INFO;
 DROP TABLE IF EXISTS BRAND_INFO;
 
-use teamdb;
-# grant all privileges on teamdb.* to 'ryuuung'@'%';
-
 -- 브랜드 정보
 CREATE TABLE BRAND_INFO (
     BRAND_ID INT AUTO_INCREMENT PRIMARY KEY ,
