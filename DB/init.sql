@@ -1,6 +1,6 @@
 CREATE DATABASE teamdb;
 
-
+grant all privileges on teamdb.* to 'skn14'@'%';
 CREATE TABLE car_info (
     car_id INT NOT NULL AUTO_INCREMENT,
     car_model VARCHAR(100),
@@ -26,3 +26,4 @@ CREATE TABLE user_info (
     FOREIGN KEY (car_id) REFERENCES car_info(car_id)
 );
 
+select * from car_info;
