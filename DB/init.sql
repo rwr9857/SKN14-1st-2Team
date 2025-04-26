@@ -1,81 +1,67 @@
+DROP TABLE IF EXISTS USER_INFO;
+DROP TABLE IF EXISTS CAR_INFO;
+DROP TABLE IF EXISTS FUEL_TYPE_INFO;
+DROP TABLE IF EXISTS MODEL_TYPE_INFO;
+DROP TABLE IF EXISTS BODY_TYPE_INFO;
+DROP TABLE IF EXISTS ENGINE_INFO;
+DROP TABLE IF EXISTS BRAND_INFO;
 
-CREATE DATABASE teamdb;
-
-show databases;
-
-show schemas;
-
-# select user, host from user;
-
-create user 'ryunnng'@'%' identified  by 'df1462';
-grant all privileges on teamdb.* to 'ryunnng'@'%';
-FLUSH PRIVILEGES;
-
-# drop table if exists user_info;
-# drop table if exists car_info;
-
-# 브랜드 정보
-create table brand_info (
-    brand_id int auto_increment primary key ,
-    brand_name varchar(30) not null
+-- 브랜드 정보
+CREATE TABLE BRAND_INFO (
+    BRAND_ID INT AUTO_INCREMENT PRIMARY KEY ,
+    BRAND_NAME VARCHAR(30) NOT NULL
 );
 
-# 엔진 정보
-create table engine_info (
-    engine_id int auto_increment primary key ,
-    engine_name varchar(30) not null
+-- 엔진 정보
+CREATE TABLE ENGINE_INFO (
+    ENGINE_ID INT AUTO_INCREMENT PRIMARY KEY ,
+    ENGINE_NAME VARCHAR(30) NOT NULL
 );
 
-# 바디 타입 정보
-create table body_type_info (
-    body_type_id int auto_increment primary key ,
-    body_type_name varchar(30)
+-- 바디 타입 정보
+CREATE TABLE BODY_TYPE_INFO (
+    BODY_TYPE_ID INT AUTO_INCREMENT PRIMARY KEY ,
+    BODY_TYPE_NAME VARCHAR(30)
 );
 
-# 모델명 정보
-create table model_type_info (
-    model_type_id int auto_increment primary key ,
-    model_type_name varchar(30)
+-- 모델명 정보
+CREATE TABLE MODEL_TYPE_INFO (
+    MODEL_TYPE_ID INT AUTO_INCREMENT PRIMARY KEY ,
+    MODEL_TYPE_NAME VARCHAR(30)
 );
 
-# 연료 정보
-create table fuel_type_info (
-    fuel_type_id int auto_increment primary key ,
-    fuel_type_name varchar(30)
+-- 연료 정보
+CREATE TABLE FUEL_TYPE_INFO (
+    FUEL_TYPE_ID INT AUTO_INCREMENT PRIMARY KEY ,
+    FUEL_TYPE_NAME VARCHAR(30)
 );
 
-# 자동차 정보
-create table car_info (
-    car_id int auto_increment primary key ,
-    car_full_name varchar(100) ,
-    car_model int,
-    car_brand int,
-    car_body_type int,
-    car_engine_type int,
-    car_fuel_type int,
-    car_price int,
-    car_horsepower int,
-    car_fuel_efficiency int,
-    car_size int,
-    car_img_url varchar(100),
-    foreign key (car_model) references model_type_info(model_type_id),
-    foreign key (car_brand) references  brand_info(brand_id),
-    foreign key (car_body_type) references body_type_info(body_type_id),
-    foreign key (car_engine_type) references engine_info(engine_id),
-    foreign key (car_fuel_type) references fuel_type_info(fuel_type_id)
+-- 자동차 정보
+CREATE TABLE CAR_INFO (
+    CAR_ID INT AUTO_INCREMENT PRIMARY KEY ,
+    CAR_FULL_NAME VARCHAR(100) ,
+    CAR_MODEL INT,
+    CAR_BRAND INT,
+    CAR_BODY_TYPE INT,
+    CAR_ENGINE_TYPE INT,
+    CAR_FUEL_TYPE INT,
+    CAR_PRICE INT,
+    CAR_HORSEPOWER INT,
+    CAR_FUEL_EFFICIENCY INT,
+    CAR_SIZE INT,
+    CAR_IMG_URL VARCHAR(100),
+    FOREIGN KEY (CAR_MODEL) REFERENCES MODEL_TYPE_INFO(MODEL_TYPE_ID),
+    FOREIGN KEY (CAR_BRAND) REFERENCES  BRAND_INFO(BRAND_ID),
+    FOREIGN KEY (CAR_BODY_TYPE) REFERENCES BODY_TYPE_INFO(BODY_TYPE_ID),
+    FOREIGN KEY (CAR_ENGINE_TYPE) REFERENCES ENGINE_INFO(ENGINE_ID),
+    FOREIGN KEY (CAR_FUEL_TYPE) REFERENCES FUEL_TYPE_INFO(FUEL_TYPE_ID)
 );
 
-# 유저 정보
-create table user_info (
-    user_id int auto_increment primary key ,
-    user_age int not null ,
-    user_gender varchar(10) not null check (user_gender in ('남', '여')),
-    car_id int not null,
-    foreign key (car_id) references car_info(car_id)
+-- 유저 정보
+CREATE TABLE USER_INFO (
+    USER_ID INT AUTO_INCREMENT PRIMARY KEY ,
+    USER_AGE INT NOT NULL ,
+    USER_GENDER VARCHAR(10) NOT NULL CHECK (USER_GENDER IN ('남', '여')),
+    CAR_ID INT NOT NULL,
+    FOREIGN KEY (CAR_ID) REFERENCES CAR_INFO(CAR_ID)
 );
-
-
-
-
-
-
