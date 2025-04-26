@@ -31,7 +31,9 @@ def get_base64_of_bin_file(bin_file):
     return base64.b64encode(data).decode()
 
 def set_background(png_file):
-    bin_str = get_base64_of_bin_file(png_file)
+    # 절대 경로로 변경
+    abs_path = os.path.abspath(png_file)
+    bin_str = get_base64_of_bin_file(abs_path)
     page_bg_img = f'''
     <style>
     .stApp {{
@@ -110,10 +112,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 차근차근 배경 이미지 적용 - 성공
-set_background('../docs/background.png')
+set_background('../docs/background.png')  # 경로 수정 (절대 경로로 바꾸기)
 
 # 차근차근 로고 적용
-st.image("../docs/logo.png", width=150)
+st.image("../docs/차근차근 로고.png", width=150)
 
 # 사용자 입력 데이터 세션 상태 초기화
 if "user_inputs" not in st.session_state:
@@ -263,170 +265,76 @@ elif st.session_state.page == "balance":
             # 세션 상태에 저장
             st.session_state.user_inputs["fuel_type"] = fuel
 
-            # 입력 완료 상태 업데이트 - 추가
-            st.session_state.input_completed["fuel"] = True
-            st.success("연료 타입이 저장되었습니다!")
+            # 입력 완료 상태 업데이트
+            if st.button("저장 후 다음"):
+                st.session_state.input_completed["fuel"] = True
+                st.success("연료 타입이 저장되었습니다!")
 
-
-        # 바디타입 선택
-        elif selected == "바디타입":
-            st.header("바디타입 선택")
+        # 바디 타입 선택 - gpt!
+        elif selected == "바디 타입":
+            st.header("차량 바디 타입 선택")
             if cur:
-                cur.execute("select BODY_TYPE_NAME FROM BODY_TYPE_INFO")
-                bodies = [row["BODY_TYPE_NAME"] for row in cur.fetchall()]
+                cur.execute("SELECT BODY_TYPE_NAME FROM BODY_TYPE_INFO")
+                body_types = [row["BODY_TYPE_NAME"] for row in cur.fetchall()]
             else:
-                bodies = ["승용차", "SUV", "경차"]
+                body_types = ["세단", "SUV", "쿠페", "해치백"]
 
-            body = st.selectbox("선호하는 바디타입을 선택하세요.", bodies)
-            st.write(f"선택한 바디타입: **{body}**")
+            body_type = st.selectbox("차량 바디 타입을 선택하세요.", body_types)
+            st.write(f"선택한 바디 타입: **{body_type}**")
 
             # 세션 상태에 저장
-            st.session_state.user_inputs["body_type"] = body
+            st.session_state.user_inputs["body_type"] = body_type
 
-            # 입력 완료 상태 업데이트 - 추가
-            if st.button("저장 후 다음", key="body_save"):
+            # 입력 완료 상태 업데이트
+            if st.button("저장 후 다음"):
                 st.session_state.input_completed["body"] = True
-                st.success("바디타입이 저장되었습니다!")
+                st.success("바디 타입이 저장되었습니다!")
 
-    # 용도 체크
-    elif selected == "용도 체크":
-        st.header("차량 사용 용도 체크")
-        purpose = st.radio("주 사용 용도를 선택하세요.", ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"], horizontal=True)
-        st.write(f"선택한 용도: **{purpose}**")
+        # 용도 선택 - gpt!
+        elif selected == "용도 체크":
+            st.header("차량 용도 선택")
+            purpose = st.selectbox("차량 용도를 선택하세요.", ["출퇴근", "여행", "가족용", "스포츠", "기타"])
+            st.write(f"선택한 용도: **{purpose}**")
 
-        # 세션 상태에 저장
-        st.session_state.user_inputs["purpose"] = purpose
+            # 세션 상태에 저장
+            st.session_state.user_inputs["purpose"] = purpose
 
-        # 입력 완료 상태 업데이트 - 추가
-        if st.button("저장 후 다음", key="purpose_save"):
-            st.session_state.input_completed["purpose"] = True
-            st.success("사용 용도가 저장되었습니다!")
+            # 입력 완료 상태 업데이트
+            if st.button("저장 후 다음"):
+                st.session_state.input_completed["purpose"] = True
+                st.success("용도가 저장되었습니다!")
 
-    # 선호도 체크
-    elif selected == "선호도":
-        st.header("중요하게 생각하는 항목을 순서대로 3개 선택해주세요")
-        st.write("[랭킹] 1~3 순위")
+        # 선호도 선택 - gpt!
+        elif selected == "선호도":
+            st.header("차량 선호도 설정")
+            preference = st.selectbox("차량 선호도를 설정하세요.", ["고급차", "가성비 좋은 차", "디자인重", "기타"])
+            st.write(f"선택한 선호도: **{preference}**")
 
-        options = ["연비(최저)", "가격(최저)", "평점(네이버 평점 기준)", "차체크기", "성능"]
+            # 세션 상태에 저장
+            st.session_state.user_inputs["preference"] = preference
 
-        # 1순위 선택
-        first = st.selectbox("1순위", options, key="rank1")
-        # 2순위 선택 (1순위에서 고른 항목은 제외)
-        second = st.selectbox("2순위", [o for o in options if o != first], key="rank2")
-        # 3순위 선택 (1,2순위에서 고른 항목은 제외)
-        third = st.selectbox("3순위", [o for o in options if o not in [first, second]], key="rank3")
+            # 입력 완료 상태 업데이트
+            if st.button("저장 후 차량 추천 보기"):
+                st.session_state.input_completed["preference"] = True
+                st.session_state.page = "result"
+                st.session_state.recommended_cars = recommend_cars()
+                st.success("선호도가 저장되었습니다!")
 
-        st.write(f"1순위: {first}, 2순위: {second}, 3순위: {third}")
-
-        # 세션에 저장
-        st.session_state.user_inputs["preference"] = [first, second, third]
-        st.session_state.input_completed["preference"] = True
-
-        # 입력 완료 상태 업데이트 - 추가
-        st.session_state.input_completed["preference"] = True
-
-        # 모든 항목 완료여부 확인
-        all_completed = all(st.session_state.input_completed.values())
-
-        if st.button("추천 차량 보기", disabled=not all_completed):
-            # 차량 추천 로직 실행
-            recommended_cars = recommend_cars()
-            st.session_state.recommended_cars = recommended_cars
-            st.session_state.page = "recommendation"
-            st.rerun()  # 페이지 새로고침
-
-        # 모든 항목이 완료되지 않았으면 안내 메시지 표시
-        if not all_completed:
-            incomplete_items = [item for item, completed in st.session_state.input_completed.items() if not completed]
-            st.warning(f"다음 항목을 완료해주세요: {', '.join(incomplete_items)}")
-
-#두번째 페이지 끝, 세번째 페이지
-
-# 추천 결과 페이지
-elif st.session_state.page == "recommendation":
-    st.markdown(
-        """
-        <style>
-        body {
-            background-color: white;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    st.markdown("<h1>나의 첫 차는?</h1>", unsafe_allow_html=True)
-
-    # 추천 차량 목록이 있는지 확인
-    if st.session_state.recommended_cars:
-        # 추천 차량 표시
-        for idx, car in enumerate(st.session_state.recommended_cars):
-            with st.container():
-                st.markdown(f'<div class="car-info-container">', unsafe_allow_html=True)
-
-                col1, col2 = st.columns([1, 2])
-
-                with col1:
-                    # 차량 이미지가 있으면 표시, 없으면 기본 이미지
-                    if 'car_img_url' in car and car['car_img_url']:
-                        st.image(car['car_img_url'], width=300)
-                    else:
-                        st.image("대체이미지주소", width=300)
-
-                with col2:
-                    # 차량 정보 헤더
-                    st.markdown(f'<div class="car-info-header">{car["brand_name"]} {car["car_full_name"]}</div>',
-                                unsafe_allow_html=True)
-
-                    # 기본 정보 표시
-                    st.markdown('<div class="car-specs">', unsafe_allow_html=True)
-
-                    # 가격 정보
-                    price_in_million = car['car_price'] / 10000  # 원 단위에서 만원 단위로 변환
-                    st.markdown(
-                        f'<div class="spec-item"><span class="spec-label">가격:</span> {price_in_million:,.1f}만원</div>',
-                        unsafe_allow_html=True)
-
-                    # 연료 타입
-                    st.markdown(
-                        f'<div class="spec-item"><span class="spec-label">연료:</span> {car["fuel_type_name"]}</div>',
-                        unsafe_allow_html=True)
-
-                    # 엔진 타입
-                    st.markdown(
-                        f'<div class="spec-item"><span class="spec-label">엔진:</span> {car["engine_name"]}</div>',
-                        unsafe_allow_html=True)
-
-                    # 연비
-                    if 'car_fuel_efficiency' in car:
-                        st.markdown(
-                            f'<div class="spec-item"><span class="spec-label">연비:</span> {car["car_fuel_efficiency"]}km/L</div>',
-                            unsafe_allow_html=True)
-
-                    # 출력 (마력/토크)
-                    if 'car_horsepower' in car:
-                        st.markdown(
-                            f'<div class="spec-item"><span class="spec-label">출력:</span> {car["car_horsepower"]}hp</div>',
-                            unsafe_allow_html=True)
-
-                    st.markdown('</div>', unsafe_allow_html=True)
-
-                    # 상세 정보 버튼
-                    if st.button(f"상세 정보 보기", key=f"detail_{idx}"):
-                        st.session_state.selected_car = car
-                        st.session_state.page = "car_detail"
-                        st.rerun()
-
-                st.markdown('</div>', unsafe_allow_html=True)
-
-        # 새로운 추천 받기 버튼
-        if st.button("같은 조건에 다른 모델 추천 받기"):
-            st.session_state.page = "balance"
-            st.rerun()
+# 차량 추천 결과 페이지
+elif st.session_state.page == "result":
+    st.markdown("<h2>추천 차량</h2>", unsafe_allow_html=True)
+    cars = st.session_state.recommended_cars
+    if cars:
+        for car in cars:
+            st.markdown(f"### {car['CAR_NAME']}")
+            st.write(f"**브랜드**: {car['BRAND_NAME']}")
+            st.write(f"**엔진 타입**: {car['ENGINE_NAME']}")
+            st.write(f"**연료 타입**: {car['FUEL_TYPE_NAME']}")
+            st.write(f"**바디 타입**: {car['BODY_TYPE_NAME']}")
+            st.write(f"**가격**: {car['CAR_PRICE']} 원")
+            st.write("---")
     else:
-        st.warning("추천 차량이 없습니다. 새로운 조건으로 다시 시도해보세요.")
-        if st.button("다시 설정하기"):
-            st.session_state.page = "balance"
-            st.rerun()
+        st.write("추천할 차량이 없습니다.")
 
 
 
