@@ -46,159 +46,133 @@ def set_background(png_file):
     '''
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
+# 기존에 정의한 set_background 함수 활용
+def clear_background():
+    st.markdown("""
+        <style>
+        .stApp {
+            background: none;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+
+# 스타일 설정 (폰트,버튼) - 버튼은 잘 구현된건지 모르겠음...
+def set_custom_styles():
+    st.markdown("""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
+        html, body, [class*="css"] {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .center-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .styled-button {
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .styled-button:hover {
+            background-color: #45a049;
+        }
+
+        .car-info-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .car-info-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .car-specs {
+            display: flex; 
+            flex-direction: column; 
+            gap: 5px; 
+        }
+
+        .spec-item {
+            padding: 5px 0;
+            font-size: 16px; 
+        }
+
+        .spec-label {
+            font-weight: bold;
+            color: #555;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+
+
+# 배경 초기화 상태 세팅
+if "background_cleared" not in st.session_state:
+    st.session_state.background_cleared = False
+
+# 초기 배경 이미지 설정 (background_cleared가 False일 때만)
+if not st.session_state.background_cleared:
+    set_background('../docs/background.png')
+
+st.image("../docs/차근차근 로고.png", width=150) # 차근차근 로고 적용
 
 # DB 연결
 conn = init_db()
 cur = conn.cursor(dictionary=True) if conn else None
 
-# 스타일 설정 (폰트,버튼) - 버튼은 잘 구현된건지 모르겠음...
-st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
-
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
+# 세션 상태 초기화
+def init_session():
+    default_values = {
+        'age': 20,
+        'gender': None,
+        'purpose': None,
+        'min_val': 1000,
+        'max_val': 5000,
+        'engine_type': None,
+        'body_type': None,
+        'first': None,
+        'second': None,
+        'third': None,
+        'recommend_cars': []
     }
+    for key, value in default_values.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
-    .center-button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
+init_session()
 
-    .styled-button {
-        border: none;
-        background-color: #4CAF50;
-        color: white;
-        padding: 15px 30px;
-        font-size: 20px;
-        cursor: pointer;
-        border-radius: 10px;
-    }
-
-    .styled-button:hover {
-        background-color: #45a049;
-    }
-
-    .car-info-container {
-        background-color: rgba(255, 255, 255, 0.9);
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-
-    .car-info-header {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-
-    .car-specs {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-
-    .spec-item {
-        padding: 5px 0;
-    }
-
-    .spec-label {
-        font-weight: bold;
-        color: #555;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# 차근차근 배경 이미지 적용 - 성공
-set_background('../docs/background.png')  # 경로 수정 (절대 경로로 바꾸기)
-
-# 차근차근 로고 적용
-st.image("../docs/차근차근 로고.png", width=150)
-
-# 사용자 입력 데이터 세션 상태 초기화
-if "user_inputs" not in st.session_state:
-    st.session_state.user_inputs = {
-        "budget_min": 0,
-        "budget_max": 5000,
-        "fuel_type": "",
-        "body_type": "",
-        "engine_type": "",
-        "purpose": "",
-        "preference": ""
-    }
-
-# 입력 완료 상태 체크 세션
-if "input_completed" not in st.session_state:
-    st.session_state.input_completed = {
-        "budget": False,
-        "fuel": False,
-        "body": False,
-        "purpose": False,
-        "preference": False
-    }
 
 # 추천 차량 세션
-if "recommended_cars" not in st.session_state:
-    st.session_state.recommended_cars = []
+def recommended_cars():
+    try:
+        cur.execute("select * from teamdb.CAR_INFO")
+        cars = cur.fetchall()
+        return cars
+    except mysql.connector.Error as e:
+        st.error(f'데이터베이스 쿼리 실패:{e}')
+        return[]
+
 
 # 페이지 상태관리
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
 
-# 차량 추천 함수 - gpt
-def recommend_cars():
-    if not conn or not cur:
-        st.error("데이터베이스 연결이 필요합니다.")
-        return []
-
-    try:
-        # 사용자 입력 가져오기
-        budget_min = st.session_state.user_inputs["budget_min"]
-        budget_max = st.session_state.user_inputs["budget_max"]
-        fuel_type = st.session_state.user_inputs["fuel_type"]
-        body_type = st.session_state.user_inputs["body_type"]
-
-        # 쿼리 작성 - 사용자 선호도에 맞는 차량 검색
-        query = """
-        Select c.*, b.BRAND_NAME, e.ENGINE_NAME, bt.BODY_TYPE_NAME, ft.FUEL_TYPE_NAME
-        From CAR_INFO c
-        join BRAND_INFO b on c.CAR_BRAND = b.BRAND_ID
-        join ENGINE_INFO e on c.CAR_ENGINE_TYPE = e.ENGINE_ID
-        join BODY_TYPE_INFO bt on c.CAR_BODY_TYPE = bt.BODY_TYPE_ID
-        join FUEL_TYPE_INFO ft on c.CAR_FUEL_TYPE = ft.FUEL_TYPE_ID
-        where c.CAR_PRICE BETWEEN %s AND %s
-        """
-
-        params = [budget_min * 10000, budget_max * 10000]
-
-        if fuel_type:
-            query += " AND ft.FUEL_TYPE_NAME = %s"
-            params.append(fuel_type)
-
-        params = [budget_min * 10000, budget_max * 10000]  # 만원 단위를 원 단위로 변환
-        # 연료 타입 필터 추가
-        if fuel_type:
-            query += " AND e.fuel_name = %s"
-            params.append(fuel_type)
-
-        # 바디 타입 필터 추가
-        if body_type:
-            query += " AND bt.body_type_name = %s"
-            params.append(body_type)
-
-        # 정렬 - 가격 기준
-        query += " ORDER BY c.car_price ASC LIMIT 5"
-
-        cur.execute(query, params)
-        cars = cur.fetchall()
-        return cars
-
-    except mysql.connector.Error as e:
-        st.error(f"차량 추천 쿼리 실패: {e}")
-        return []
 
 
 # 첫 번째 페이지(찾으러 가기)
@@ -212,14 +186,18 @@ if st.session_state.page == "home":
             st.session_state.page = "balance"
         st.markdown('</div>', unsafe_allow_html=True)
 
-## 첫 페이지 끝, 두번째는 gpt 임의 작성 후 성규님과 맞추기
+## 2 페이지, 성규님 코드 삽입
 
 # 밸런스(옵션선택) 화면
 elif st.session_state.page == "balance":
+    if not st.session_state.background_cleared:
+        clear_background()
+        st.session_state.background_cleared = True
+
     selected = option_menu(
         menu_title=None,
-        options=["예산 범위", "연료 타입", "바디타입", "용도 체크", "선호도"],
-        icons=["cash-coin", "ev-station", "car-front", "clipboard-check", "heart"],
+        options=["기본 정보", "예산 범위", "연료 타입", "바디타입", "선호도"],
+        icons=["info-circle", "cash-coin", "ev-station", "car-front-fill", "heart"],
         orientation="horizontal",
         default_index=0,
         styles={
@@ -230,111 +208,178 @@ elif st.session_state.page == "balance":
         }
     )
 
-    # 예산 범위 입력
-    if selected == "예산 범위":
-        st.header("예산 설정")
-        st.write("예산 차량 구매 예산은 어느 정도 생각하고 계신가요?")
+    # 페이지 내용 업데이트
+    if selected == "기본 정보":
+        st.header("기본 정보")
+        st.session_state.age = st.number_input("나이(세)", 20, 40, st.session_state.age)
+        st.session_state.gender = st.radio("성별", ["남", "여"], horizontal=True, index=["남", "여"].index(
+            st.session_state.gender) if st.session_state.gender else 0)
+        st.session_state.purpose = st.selectbox("주 사용 용도", ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"],
+                                                index=["출퇴근", "여행/나들이", "업무용", "주말 드라이브"].index(
+                                                    st.session_state.purpose) if st.session_state.purpose else 0)
 
-        min_val, max_val = st.slider(
-            "구매 예산 범위 설정 (단위: 만원)",
-            0, 5000, (0, 5000), step=100
+    elif selected == "예산 범위":
+        st.markdown("### 차량 구매 예산")
+        col1, col2 = st.columns([1, 1.3])
+        with col1:
+            st.image("예산_아이콘.png", width=100)
+        with col2:
+            st.session_state.min_val, st.session_state.max_val = st.slider(
+                "구매 예산 범위 설정 (단위: 만 원)", 1000, 5000, (st.session_state.min_val, st.session_state.max_val), step=500
+            )
+
+    elif selected == "연료 타입":
+        st.header("연료 타입 선택")
+        st.session_state.engine_type = st.radio(
+            "원하는 연료 타입을 선택하세요",
+            ["디젤", "가솔린", "하이브리드", "전기"],
+            horizontal=True,
+            index=["디젤", "가솔린", "하이브리드", "전기"].index(
+                st.session_state.engine_type) if st.session_state.engine_type else 0
         )
-        st.write(f"선택한 예산: **{min_val}만원 ~ {max_val}만원**")
 
-        # 세션 상태에 저장
-        st.session_state.user_inputs["budget_min"] = min_val
-        st.session_state.user_inputs["budget_max"] = max_val
+    elif selected == "바디타입":
+        st.header("바디타입 선택")
+        st.session_state.body_type = st.radio(
+            "선호하는 바디타입을 선택하세요",
+            ["경차", "승용차", "SUV", "기타"],
+            horizontal=True,
+            index=["경차", "승용차", "SUV", "기타"].index(st.session_state.body_type) if st.session_state.body_type else 0
+        )
 
-        # 입력 완료 상태 업데이트 - 추가
-        if st.button("저장 후 다음", key="budget_save"):
-            st.session_state.input_completed["budget"] = True
-            st.success("예산 범위가 저장되었습니다!")
+    elif selected == "선호도":
+        st.header("선호도 선택")
+        st.markdown("### 중요하게 생각하는 항목을 순서대로 3개 선택해주세요!")
+        preference_options = [
+            "연비 (최저)",
+            "가격 (최저)",
+            "평점 (네이버 평점 기준)",
+            "차체 크기 (실내 공간 기준 = 축거/전장*100)",
+            "성능 (출력-최저)"
+        ]
+        # 1순위 선택
+        first_priority = st.selectbox(
+            "🏆 1순위",
+            options=preference_options,
+            key="first"
+        )
 
-        # 연료 타입 선택
-        elif selected == "연료 타입":
-            st.header("연료 타입 선택")
-            if cur:
-                cur.execute("SELECT FUEL_TYPE_NAME FROM FUEL_TYPE_INFO")
-                fuels = [row["FUEL_TYPE_NAME"] for row in cur.fetchall()]
-            else:
-                fuels = ["가솔린", "디젤", "하이브리드", "전기"]
+        # 2순위 선택
+        second_priority = st.selectbox(
+            "🥈 2순위",
+            options=[opt for opt in preference_options if opt != st.session_state.first],
+            key="second"
+        )
 
-            fuel = st.selectbox("선호하는 연료 타입을 선택하세요.", fuels)
-            st.write(f"선택한 연료 타입: **{fuel}**")
+        # 3순위 선택
+        third_priority = st.selectbox(
+            "🥉 3순위",
+            options=[opt for opt in preference_options if opt not in (st.session_state.first, st.session_state.second)],
+            key="third"
+        )
 
-            # 세션 상태에 저장
-            st.session_state.user_inputs["fuel_type"] = fuel
+        # 선택 결과 출력
+        st.write("#### 🔎 선택한 중요도 순위")
+        st.write(f"1순위: **{st.session_state.first}**")
+        st.write(f"2순위: **{st.session_state.second}**")
+        st.write(f"3순위: **{st.session_state.third}**")
 
-            # 입력 완료 상태 업데이트
-            if st.button("저장 후 다음"):
-                st.session_state.input_completed["fuel"] = True
-                st.success("연료 타입이 저장되었습니다!")
+    # 모든 항목 완료 체크 및 다음 단계 버튼
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 👉 모든 입력을 마치셨나요?")
+    required_fields = [
+        st.session_state.age,
+        st.session_state.gender,
+        st.session_state.purpose,
+        st.session_state.min_val,
+        st.session_state.max_val,
+        st.session_state.engine_type,
+        st.session_state.body_type,
+        st.session_state.first,
+        st.session_state.second,
+        st.session_state.third
+    ]
 
-        # 바디 타입 선택 - gpt!
-        elif selected == "바디 타입":
-            st.header("차량 바디 타입 선택")
-            if cur:
-                cur.execute("SELECT BODY_TYPE_NAME FROM BODY_TYPE_INFO")
-                body_types = [row["BODY_TYPE_NAME"] for row in cur.fetchall()]
-            else:
-                body_types = ["세단", "SUV", "쿠페", "해치백"]
+    if st.sidebar.button("다음 페이지로 이동"):
+        if all(required_fields):
+            st.sidebar.success("✅ 다음 페이지로 이동합니다!")
+            recommended_cars()
+            st.session_state.page = "recommendation"
+            st.rerun()
+        else:
+            st.sidebar.error("⚠️ 모든 값을 입력 후 버튼을 눌러주세요.")
 
-            body_type = st.selectbox("차량 바디 타입을 선택하세요.", body_types)
-            st.write(f"선택한 바디 타입: **{body_type}**")
 
-            # 세션 상태에 저장
-            st.session_state.user_inputs["body_type"] = body_type
+# 추천 결과 페이지
+elif st.session_state.page == "recommendation":
+    st.markdown("<h1>나의 첫 차는?</h1>", unsafe_allow_html=True)
 
-            # 입력 완료 상태 업데이트
-            if st.button("저장 후 다음"):
-                st.session_state.input_completed["body"] = True
-                st.success("바디 타입이 저장되었습니다!")
+    # 추천 차량 목록이 있는지 확인
+    if "recommended_cars" in st.session_state and st.session_state.recommended_cars:
+        # 추천 차량 표시
+        for idx, car in enumerate(st.session_state.recommended_cars):
+            with st.container():
+                st.markdown(f'<div class="car-info-container">', unsafe_allow_html=True)
 
-        # 용도 선택 - gpt!
-        elif selected == "용도 체크":
-            st.header("차량 용도 선택")
-            purpose = st.selectbox("차량 용도를 선택하세요.", ["출퇴근", "여행", "가족용", "스포츠", "기타"])
-            st.write(f"선택한 용도: **{purpose}**")
+                col1, col2 = st.columns([1, 2])
 
-            # 세션 상태에 저장
-            st.session_state.user_inputs["purpose"] = purpose
+                with col1:
+                    # 차량 이미지가 있으면 표시, 없으면 기본 이미지
+                    if 'CAR_IMG_URL' in car and car['CAR_IMG_URL']:
+                        st.image(car['CAR_IMG_URL'], width=300)
+                    else:
+                        st.image("대체이미지주소", width=300)
 
-            # 입력 완료 상태 업데이트
-            if st.button("저장 후 다음"):
-                st.session_state.input_completed["purpose"] = True
-                st.success("용도가 저장되었습니다!")
+                with col2:
+                    # 차량 정보 헤더
+                    st.markdown(f'<div class="car-info-header">{car["BRAND_NAME"]} {car["CAR_FULL_NAME"]}</div>',
+                                unsafe_allow_html=True)
 
-        # 선호도 선택 - gpt!
-        elif selected == "선호도":
-            st.header("차량 선호도 설정")
-            preference = st.selectbox("차량 선호도를 설정하세요.", ["고급차", "가성비 좋은 차", "디자인重", "기타"])
-            st.write(f"선택한 선호도: **{preference}**")
+                    # 기본 정보 표시
+                    st.markdown('<div class="car-specs">', unsafe_allow_html=True)
 
-            # 세션 상태에 저장
-            st.session_state.user_inputs["preference"] = preference
+                    # 가격 정보
+                    price_in_million = car["CAR_PRICE"] / 10000  # 원 단위에서 만원 단위로 변환
+                    st.markdown(
+                        f'<div class="spec-item"><span class="spec-label">가격:</span> {price_in_million:,.1f}만원</div>',
+                        unsafe_allow_html=True)
 
-            # 입력 완료 상태 업데이트
-            if st.button("저장 후 차량 추천 보기"):
-                st.session_state.input_completed["preference"] = True
-                st.session_state.page = "result"
-                st.session_state.recommended_cars = recommend_cars()
-                st.success("선호도가 저장되었습니다!")
+                    # 연료 타입
+                    st.markdown(
+                        f'<div class="spec-item"><span class="spec-label">연료:</span> {car["FUEL_TYPE_NAME"]}</div>',
+                        unsafe_allow_html=True)
 
-# 차량 추천 결과 페이지
-elif st.session_state.page == "result":
-    st.markdown("<h2>추천 차량</h2>", unsafe_allow_html=True)
-    cars = st.session_state.recommended_cars
-    if cars:
-        for car in cars:
-            st.markdown(f"### {car['CAR_NAME']}")
-            st.write(f"**브랜드**: {car['BRAND_NAME']}")
-            st.write(f"**엔진 타입**: {car['ENGINE_NAME']}")
-            st.write(f"**연료 타입**: {car['FUEL_TYPE_NAME']}")
-            st.write(f"**바디 타입**: {car['BODY_TYPE_NAME']}")
-            st.write(f"**가격**: {car['CAR_PRICE']} 원")
-            st.write("---")
+                    # 엔진 타입
+                    st.markdown(
+                        f'<div class="spec-item"><span class="spec-label">엔진:</span> {car["ENGINE_NAME"]}</div>',
+                        unsafe_allow_html=True)
+
+                    # 연비
+                    if 'CAR_FUEL_EFFICIENCY' in car:
+                        st.markdown(
+                            f'<div class="spec-item"><span class="spec-label">연비:</span> {car["CAR_FUEL_EFFICIENCY"]}km/L</div>',
+                            unsafe_allow_html=True)
+
+                    # 출력 (마력/토크)
+                    if 'CAR_HORSEPOWER' in car:
+                        st.markdown(
+                            f'<div class="spec-item"><span class="spec-label">출력:</span> {car["CAR_HORSEPOWER"]}hp</div>',
+                            unsafe_allow_html=True)
+
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+
+                st.markdown('</div>', unsafe_allow_html=True)
+
+        # 새로운 추천 받기 버튼
+        if st.button("같은 조건에 다른 모델 추천 받기"):
+            # 4 페이지로 이동하는 로직 작성 - 준기님 코드와 연결 필요
+            st.rerun()
     else:
-        st.write("추천할 차량이 없습니다.")
+        st.warning("추천 차량이 없습니다. 새로운 조건으로 다시 시도해보세요.")
+        if st.button("다시 설정하기"):
+            st.session_state.page = "balance"
+            st.rerun()
 
 
 
