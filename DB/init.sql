@@ -21,19 +21,19 @@ CREATE TABLE BRAND_INFO (
 -- 바디 타입 정보
 CREATE TABLE BODY_TYPE_INFO (
     BODY_TYPE_ID INT AUTO_INCREMENT PRIMARY KEY ,
-    BODY_TYPE_NAME VARCHAR(30)
+    BODY_TYPE_NAME VARCHAR(30) NOT NULL
 );
 
 -- 모델명 정보
 CREATE TABLE MODEL_TYPE_INFO (
     MODEL_TYPE_ID INT AUTO_INCREMENT PRIMARY KEY ,
-    MODEL_TYPE_NAME VARCHAR(30)
+    MODEL_TYPE_NAME VARCHAR(30) NOT NULL
 );
 
 -- 연료 정보
 CREATE TABLE FUEL_TYPE_INFO (
     FUEL_TYPE_ID INT AUTO_INCREMENT PRIMARY KEY ,
-    FUEL_TYPE_NAME VARCHAR(30)
+    FUEL_TYPE_NAME VARCHAR(30) NOT NULL
 );
 
 -- 자동차 정보
@@ -45,8 +45,8 @@ CREATE TABLE CAR_INFO (
     CAR_BODY_TYPE INT,
     CAR_FUEL_TYPE INT,
     CAR_PRICE INT,
-    CAR_HORSEPOWER INT,
-    CAR_FUEL_EFFICIENCY INT,
+    CAR_HORSEPOWER FLOAT,
+    CAR_FUEL_EFFICIENCY FLOAT,
     CAR_MODEL_YEAR INT,
     CAR_SIZE INT,
     CAR_ENGINE_TYPE varchar(40),
@@ -65,6 +65,24 @@ CREATE TABLE USER_INFO (
     USER_GENDER VARCHAR(10) NOT NULL CHECK (USER_GENDER IN ('남', '여')),
     CAR_ID INT NOT NULL,
     FOREIGN KEY (CAR_ID) REFERENCES CAR_INFO(CAR_ID)
+);
+
+create table car_review_info (
+    review_id int auto_increment primary key ,
+    car_id int not null,
+    avg_score float not null,
+    survey_people_count int,
+    graph_info varchar(100),
+    foreign key (car_id) references car_info(car_id)
+);
+
+create table comment_info (
+    comment_id int auto_increment primary key ,
+    review_id int not null,
+    nickname varchar(20) not null,
+    comment_avg_score float,
+    comment_text varchar(200),
+    created_at timestamp default current_timestamp
 );
 
 insert into BRAND_INFO (BRAND_NAME)

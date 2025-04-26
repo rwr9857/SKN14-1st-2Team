@@ -49,31 +49,37 @@ ORDER BY c.CAR_PRICE;
 
 /*
 파이썬 이런식!
-L = m.MODEL_TYPE_ID
-JOIN BODY_TYPE_INFO bt ON c.CAR_BODY_TYPE = bt.BODY_TYPE_ID
-JOIN FUEL_TYPE_INFO f ON c.CAR_FUEL_TYPE = f.FUEL_TYPE_ID
-WHERE 1=1
-"""
+def make_query(price_range=None, min_efficiency=None, body_type=None, fuel_types=None):
+    query = """
+    SELECT
+        c.CAR_ID,
+        c.CAR_FULL_NAME,
+        b.BRAND_NAME,
+        m.MODEL_TYPE_NAME,
+        bt.BODY_TYPE_NAME,
+        f.FUEL_TYPE_NAME,
+        c.CAR_PRICE,
+        c.CAR_FUEL_EFFICIENCY
+    FROM CAR_INFO c
+    JOIN BRAND_INFO b ON c.CAR_BRAND = b.BRAND_ID
+    JOIN MODEL_TYPE_INFO m ON c.CAR_MODEL = m.MODEL_TYPE_ID
+    JOIN BODY_TYPE_INFO bt ON c.CAR_BODY_TYPE = bt.BODY_TYPE_ID
+    JOIN FUEL_TYPE_INFO f ON c.CAR_FUEL_TYPE = f.FUEL_TYPE_ID
+    WHERE 1=1
+    """
 
-# 사용자가 선택한 옵션
-body_type = "SUV"             # or None
-min_price = 2000              # or None
-max_price = 5000              # or None
-min_efficiency = 14           # or None
-fuel_types = ["가솔린", "하이브리드"]  # or None
+    if price_range:
+        query += f" AND c.CAR_PRICE BETWEEN {price_range[0]} AND {price_range[1]}"
+    if min_efficiency:
+        query += f" AND c.CAR_FUEL_EFFICIENCY >= {min_efficiency}"
+    if body_type:
+        query += f" AND bt.BODY_TYPE_NAME = '{body_type}'"
+    if fuel_types:
+        fuels = "', '".join(fuel_types)
+        query += f" AND f.FUEL_TYPE_NAME IN ('{fuels}')"
 
-# 조건 추가
-if body_type:
-    query += f" AND bt.BODY_TYPE_NAME = '{body_type}'"
-if min_price and max_price:
-    query += f" AND c.CAR_PRICE BETWEEN {min_price} AND {max_price}"
-if min_efficiency:
-    query += f" AND c.CAR_FUEL_EFFICIENCY >= {min_efficiency}"
-if fuel_types:
-    fuel_list = "', '".join(fuel_types)
-    query += f" AND f.FUEL_TYPE_NAME IN ('{fuel_list}')"
-
-query += " ORDER BY c.CAR_PRICE"
+    query += " ORDER BY c.CAR_PRICE"
+    return query
 */
 
 

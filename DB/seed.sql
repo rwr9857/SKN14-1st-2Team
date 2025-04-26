@@ -108,3 +108,53 @@ INSERT INTO USER_INFO (USER_AGE, USER_GENDER, CAR_ID) VALUES
 (50, '남', 48),
 (43, '여', 49),
 (29, '남', 50);
+
+-- car_review_info 테이블 더미 데이터 20개
+INSERT INTO car_review_info (car_id, avg_score, survey_people_count, graph_info)
+VALUES
+(1, 4.5, 120, '{"speed": 4, "comfort": 5, "design": 4}'),
+(2, 3.8, 85, '{"speed": 3, "comfort": 4, "design": 4}'),
+(3, 4.2, 95, '{"speed": 5, "comfort": 4, "design": 4}'),
+(4, 3.5, 110, '{"speed": 3, "comfort": 3, "design": 4}'),
+(5, 4.7, 150, '{"speed": 5, "comfort": 5, "design": 5}'),
+(6, 3.9, 80, '{"speed": 4, "comfort": 4, "design": 3}'),
+(7, 4.1, 90, '{"speed": 5, "comfort": 4, "design": 3}'),
+(8, 4.3, 70, '{"speed": 4, "comfort": 5, "design": 5}'),
+(9, 3.6, 60, '{"speed": 3, "comfort": 3, "design": 4}'),
+(10, 4.0, 100, '{"speed": 4, "comfort": 4, "design": 4}'),
+(11, 3.7, 65, '{"speed": 3, "comfort": 3, "design": 3}'),
+(12, 4.8, 200, '{"speed": 5, "comfort": 5, "design": 5}'),
+(13, 3.9, 90, '{"speed": 4, "comfort": 4, "design": 4}'),
+(14, 4.4, 130, '{"speed": 5, "comfort": 5, "design": 4}'),
+(15, 3.5, 75, '{"speed": 3, "comfort": 4, "design": 3}'),
+(16, 4.6, 140, '{"speed": 5, "comfort": 5, "design": 5}'),
+(17, 3.8, 80, '{"speed": 4, "comfort": 3, "design": 4}'),
+(18, 4.1, 110, '{"speed": 5, "comfort": 4, "design": 5}'),
+(19, 3.6, 70, '{"speed": 3, "comfort": 3, "design": 4}'),
+(20, 4.2, 120, '{"speed": 5, "comfort": 4, "design": 5}');
+
+-- comment_info 테이블 더미 데이터 20개
+INSERT INTO comment_info (review_id, nickname, comment_avg_score, comment_text)
+VALUES
+(1, 'user123', 4.5, '차가 매우 부드럽고 승차감이 좋아요.'),
+(1, 'driver01', 4.0, '디자인도 마음에 들어요.'),
+(2, 'speedy77', 3.5, '가속력은 좋은데 소음이 좀 있어요.'),
+(2, 'happy_car', 4.2, '연비도 괜찮고 만족합니다.'),
+(3, 'auto_fan', 4.1, '속도감이 좋습니다.'),
+(4, 'eco_driver', 3.8, '친환경적인 느낌이 강합니다.'),
+(5, 'luxury_lover', 4.7, '고급스러운 내부 디자인이 인상적이에요.'),
+(6, 'city_rider', 4.0, '도심 주행에 편리합니다.'),
+(7, 'mountain_guy', 3.9, '언덕에서도 문제없이 잘 올라가네요.'),
+(8, 'roadtrip21', 4.3, '장거리 운전에 최적입니다.'),
+(9, 'fastlane', 3.7, '가속력은 좋은데 연비가 아쉬워요.'),
+(10, 'mom_driver', 4.0, '아이들과 타기에 좋아요.'),
+(11, 'student99', 3.8, '가격 대비 성능 좋아요.'),
+(12, 'businessman', 4.8, '출장용으로 최고입니다.'),
+(13, 'casual_rider', 3.9, '일상용으로 무난합니다.'),
+(14, 'design_fan', 4.5, '외관 디자인이 정말 예쁩니다.'),
+(15, 'mechanic88', 3.6, '엔진 성능이 좀 아쉽네요.'),
+(16, 'comfort_seeker', 4.6, '편안함이 압도적입니다.'),
+(17, 'speed_racer', 3.9, '속도만큼은 최고입니다.'),
+(18, 'family_guy', 4.1, '가족용으로 추천해요.'),
+(19, 'quiet_driver', 3.5, '조용한 차를 원했는데 조금 시끄러워요.'),
+(20, 'sunny_day', 4.2, '햇살 좋은 날 드라이브에 딱입니다.');
