@@ -3,4 +3,5 @@ streamlit
 mysql-connector-python
 python-dotenv
 selenium
+webdriver_manager
 beautifulsoup4
