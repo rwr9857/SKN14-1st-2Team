@@ -6,6 +6,7 @@ from PIL import Image
 
 load_dotenv()
 
+
 def init_db():
     try:
         conn = mysql.connector.connect(
@@ -20,6 +21,7 @@ def init_db():
         st.error(f"DB 연결 실패: {e}")
         return None
 
+
 # --- 필터용 고유값 조회 함수 ---
 def get_distinct_values(query):
     conn = init_db()
@@ -32,10 +34,10 @@ def get_distinct_values(query):
     finally:
         conn.close()
 
+
 body_types = ["전체"] + get_distinct_values("SELECT BODY_TYPE_NAME FROM teamdb.BODY_TYPE_INFO")
 fuel_types = ["전체"] + get_distinct_values("SELECT FUEL_TYPE_NAME FROM teamdb.FUEL_TYPE_INFO")
 model_types = ["전체"] + get_distinct_values("SELECT MODEL_TYPE_NAME FROM teamdb.MODEL_TYPE_INFO")
-
 
 # --- 사이드바 메뉴 및 페이지 라우팅 ---
 if "page" not in st.session_state:
@@ -57,10 +59,53 @@ except FileNotFoundError:
     st.error("로고 이미지를 찾을 수 없습니다.")
 
 
+def get_review_summary():
+    conn = init_db()
+    if conn is None:
+        return []
+    try:
+        cur = conn.cursor(dictionary=True)
+        query = """
+        SELECT
+            cri.car_name,
+            cri.avg_score,
+            cri.survey_people_count,
+            cri.graph_info
+        FROM teamdb.car_review_info cri
+        JOIN teamdb.CAR_INFO ci ON cri.car_name = ci.CAR_FULL_NAME
+        """
+        cur.execute(query)
+        return cur.fetchall()
+    finally:
+        conn.close()
+
+
+def get_comments_by_car(car_name):
+    conn = init_db()
+    if conn is None:
+        return []
+    try:
+        cur = conn.cursor(dictionary=True)
+        query = f"""
+        SELECT
+            ci.nickname,
+            ci.comment_avg_score,
+            ci.comment_text,
+            ci.created_at
+        FROM car_review_info cri
+        JOIN comment_info ci ON cri.review_id = ci.review_id
+        WHERE cri.car_name = '{car_name}'
+        """
+        cur.execute(query)
+        return cur.fetchall()
+    finally:
+        conn.close()
+
+
 # --- 차량 정보 조회 페이지 ---
 if st.session_state.page == "차량 정보 조회":
     # --- 필터 드롭다운 ---
-    col1, col2, col3, col4, col5 = st.columns([1,1,1,1,1])
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     with col1:
         selected_body = st.selectbox("외형", body_types)
     with col2:
@@ -74,6 +119,7 @@ if st.session_state.page == "차량 정보 조회":
 
     st.markdown("---")
 
+
     # --- 필터 조건 변환 함수 ---
     def get_price_range(selected):
         if selected == "1000만원대":
@@ -86,6 +132,7 @@ if st.session_state.page == "차량 정보 조회":
             return (4000, 1_000_000)
         return None
 
+
     def get_min_efficiency(selected):
         if selected == "10이하":
             return 0
@@ -95,8 +142,10 @@ if st.session_state.page == "차량 정보 조회":
             return 15
         return None
 
+
     # --- make_query 함수 ---
-    def make_query(price_range=None, min_efficiency=None, body_type=None, model_type=None, fuel_type=None, limit=8, offset=0):
+    def make_query(price_range=None, min_efficiency=None, body_type=None, model_type=None, fuel_type=None, limit=8,
+                   offset=0):
         query = """
         SELECT
             c.CAR_ID,
@@ -128,13 +177,16 @@ if st.session_state.page == "차량 정보 조회":
         query += f" ORDER BY c.CAR_PRICE LIMIT {limit} OFFSET {offset}"
         return query
 
+
     # --- 페이지네이션 상태 ---
     if "pagenation" not in st.session_state:
         st.session_state.pagenation = 1
 
+
     def set_pagenation(p):
         st.session_state.pagenation = p
         st.rerun()
+
 
     # --- 차량 목록 가져오기 ---
     page_size = 8
@@ -167,7 +219,7 @@ if st.session_state.page == "차량 정보 조회":
     # --- 차량 카드 표시 ---
     if cars_from_db:
         for i in range(0, len(cars_from_db), 4):
-            card_row = cars_from_db[i : i + 4]
+            card_row = cars_from_db[i: i + 4]
             cols = st.columns(4)
             for idx, car in enumerate(card_row):
                 with cols[idx]:
@@ -178,26 +230,180 @@ if st.session_state.page == "차량 정보 조회":
                         st.image(dummy_image_url, use_container_width=True)
                     st.markdown(f"**{car['CAR_FULL_NAME']}**")
                     st.markdown(f"{car['CAR_PRICE']}만원")
+
     else:
         st.write("차량 정보가 없습니다.")
 
-    # --- 페이지네이션 버튼 ---
-    st.markdown("### ")
-    pagination_cols = st.columns(5)
-    for i in range(5):
-        with pagination_cols[i]:
-            if st.button(str(i + 1)):
-                set_pagenation(i + 1)
+    # ⭐ 차량이 있든 없든 항상 페이지네이션 표시 ⭐
+    page_size = 8
+    offset = (st.session_state.pagenation - 1) * page_size
 
-# --- 리뷰와 평점 페이지(추후 구현) ---
+    # 전체 차량 수 계산 (쿼리에서 LIMIT과 OFFSET 제거)
+    total_query = make_query(
+        price_range=get_price_range(selected_price) if selected_price != "전체" else None,
+        min_efficiency=get_min_efficiency(selected_eff) if selected_eff != "전체" else None,
+        body_type=selected_body if selected_body != "전체" else None,
+        model_type=selected_model if selected_model != "전체" else None,
+        fuel_type=selected_fuel if selected_fuel != "전체" else None,
+        limit=1000000,  # 큰 숫자로 설정
+        offset=0
+    )
+
+    # 마지막 ORDER BY 부분과 LIMIT 부분 제거
+    total_query = total_query.split("ORDER BY")[0] + "ORDER BY 1"
+
+    conn = init_db()
+    total_cars = 0
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute(f"SELECT COUNT(*) FROM ({total_query}) as t")
+            total_cars = cur.fetchone()[0]
+        except mysql.connector.Error as e:
+            st.error(f"전체 차량 수 조회 실패: {e}")
+        finally:
+            conn.close()
+
+    total_pages = (total_cars - 1) // page_size + 1
+
+    page_block = 5
+    current_block = (st.session_state.pagenation - 1) // page_block
+    start_page = current_block * page_block + 1
+    end_page = min(start_page + page_block - 1, total_pages)  # 최대 페이지 수 동적 계산
+
+    st.markdown("### ")
+    pagination_cols = st.columns(page_block + 2)  # 이전 버튼과 다음 버튼 포함
+
+    # '이전' 버튼
+    if start_page > 1:
+        with pagination_cols[0]:
+            if st.button("이전", key="car_page_prev"):
+                set_pagenation(start_page - 1)
+    else:
+        pagination_cols[0].markdown("&nbsp;")  # 빈칸
+
+    # 페이지 버튼들
+    for idx, p in enumerate(range(start_page, end_page + 1)):
+        with pagination_cols[idx + 1]:
+            # 현재 페이지 강조 또는 버튼 생성
+            if p == st.session_state.pagenation:
+                st.markdown(f"**[{p}]**")
+            else:
+                if st.button(str(p), key=f"car_page_btn_{p}"):
+                    set_pagenation(p)
+
+    # '다음' 버튼
+    if end_page < total_pages:
+        with pagination_cols[-1]:
+            if st.button("다음", key="car_page_next"):
+                set_pagenation(end_page + 1)
+    else:
+        pagination_cols[-1].markdown("&nbsp;")  # 빈칸
+
+
+# --- 리뷰와 평점 페이지 ---
 elif st.session_state.page == "리뷰와 평점":
     st.header("차량 리뷰 및 평점")
-    st.info("차량별 리뷰 및 평점 데이터는 추후 제공될 예정입니다.")
-    # 추후: 차량 리스트, 각 차량별 리뷰/평점 표시
+
+    reviews = get_review_summary()
+
+    # 리뷰 페이지네이션 상태
+    if "review_pagenation" not in st.session_state:
+        st.session_state.review_pagenation = 1
+
+
+    def set_review_pagenation(p):
+        st.session_state.review_pagenation = p
+        st.rerun()
+
+
+    # 페이지네이션 설정
+    review_page_size = 4  # 한 페이지에 보여줄 리뷰 수
+    total_reviews = len(reviews)
+    total_review_pages = (total_reviews - 1) // review_page_size + 1 if total_reviews > 0 else 1
+
+    # 현재 페이지에 표시할 리뷰 계산
+    start_idx = (st.session_state.review_pagenation - 1) * review_page_size
+    end_idx = min(start_idx + review_page_size, total_reviews)
+    current_reviews = reviews[start_idx:end_idx] if reviews else []
+
+    if reviews:
+        # 현재 페이지의 리뷰만 표시
+        for i, review in enumerate(current_reviews):
+            cols = st.columns(1)  # 1열만
+            with cols[0]:
+                st.markdown(f"### {review['car_name']}")
+                st.metric("평균 평점", f"{review['avg_score']:.1f} ⭐️")
+                st.write(f"설문 참여 인원: {review['survey_people_count']}명")
+
+                # 그래프
+                graph_data = {}
+                for line in review['graph_info'].split(','):
+                    parts = line.strip().split('\n')
+                    if len(parts) == 2:
+                        key = parts[0].strip()
+                        value = parts[1].strip()
+                        try:
+                            graph_data[key] = float(value)
+                        except ValueError:
+                            continue
+
+                if graph_data:
+                    st.bar_chart(graph_data)
+
+                # 자세히 보기 버튼 - 고유 키 사용
+                display_idx = start_idx + i  # 전체 리스트 기준 인덱스
+                if st.button(f"{review['car_name']} 댓글 보기", key=f"review_comment_{display_idx}"):
+                    comments = get_comments_by_car(review['car_name'])
+                    if comments:
+                        for comment in comments:
+                            st.markdown(
+                                f"**{comment['nickname']}** ({comment['comment_avg_score']}⭐️) - {comment['created_at']}")
+                            st.write(comment['comment_text'])
+                            st.markdown("---")
+                    else:
+                        st.write("댓글이 없습니다.")
+    else:
+        st.info("리뷰 정보가 없습니다.")
+
+    # --- 리뷰 페이지네이션 표시 ---
+    if total_reviews > 0:
+        review_page_block = 5
+        current_block = (st.session_state.review_pagenation - 1) // review_page_block
+        start_page = current_block * review_page_block + 1
+        end_page = min(start_page + review_page_block - 1, total_review_pages)
+
+        st.markdown("### ")
+        pagination_cols = st.columns(review_page_block + 2)  # 이전, 페이지번호들, 다음
+
+        # '이전' 버튼
+        if start_page > 1:
+            with pagination_cols[0]:
+                if st.button("이전", key="review_prev_btn"):
+                    set_review_pagenation(start_page - 1)
+        else:
+            pagination_cols[0].markdown("&nbsp;")
+
+        # 페이지 번호 버튼들
+        for idx, p in enumerate(range(start_page, end_page + 1)):
+            with pagination_cols[idx + 1]:
+                # 현재 페이지 강조 또는 버튼 생성
+                if p == st.session_state.review_pagenation:
+                    st.markdown(f"**[{p}]**")
+                else:
+                    if st.button(str(p), key=f"review_page_{p}"):
+                        set_review_pagenation(p)
+
+        # '다음' 버튼
+        if end_page < total_review_pages:
+            with pagination_cols[-1]:
+                if st.button("다음", key="review_next_btn"):
+                    set_review_pagenation(end_page + 1)
+        else:
+            pagination_cols[-1].markdown("&nbsp;")
 
 # --- 통계 정보 페이지(예시) ---
 elif st.session_state.page == "통계 정보":
     st.header("통계 정보")
     st.info("통계 기능은 추후 제공될 예정입니다.")
-
 
