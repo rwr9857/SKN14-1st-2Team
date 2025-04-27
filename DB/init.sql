@@ -89,10 +89,10 @@ create table comment_info (
 );
 
 
-create table test01 (
-    id int auto_increment primary key ,
-    brand_name varchar(20) not null
-);
+# create table test01 (
+#     id int auto_increment primary key ,
+#     brand_name varchar(20) not null
+# );
 
 
 insert into BRAND_INFO (BRAND_NAME)

@@ -406,4 +406,3 @@ elif st.session_state.page == "리뷰와 평점":
 elif st.session_state.page == "통계 정보":
     st.header("통계 정보")
     st.info("통계 기능은 추후 제공될 예정입니다.")
-
