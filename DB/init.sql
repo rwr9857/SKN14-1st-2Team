@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS MODEL_TYPE_INFO;
 DROP TABLE IF EXISTS BODY_TYPE_INFO;
 DROP TABLE IF EXISTS ENGINE_INFO;
 DROP TABLE IF EXISTS BRAND_INFO;
+drop table if exists car_review_info;
+drop table if exists comment_info;
 
 -- 브랜드 정보
 CREATE TABLE BRAND_INFO (
@@ -69,7 +71,8 @@ CREATE TABLE USER_INFO (
 
 create table car_review_info (
     review_id int auto_increment primary key ,
-    car_id int not null,
+    car_id int,
+    car_name varchar(100) not null,
     avg_score float not null,
     survey_people_count int,
     graph_info varchar(100),

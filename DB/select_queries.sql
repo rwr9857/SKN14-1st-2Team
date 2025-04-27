@@ -17,11 +17,6 @@ WHERE c.CAR_PRICE BETWEEN 2000 AND 4000
 ORDER BY c.CAR_FUEL_EFFICIENCY
 LIMIT 3;
 
-
-
-
-
-
 # 네번째 페이지 정보 조회
 SELECT
     c.CAR_ID,
@@ -82,6 +77,27 @@ def make_query(price_range=None, min_efficiency=None, body_type=None, fuel_types
     return query
 */
 
+# 리뷰 자동차 이름을 통해 ID 찾아 연결하기
+update car_review_info cri
+join car_info ci on cri.car_name = ci.CAR_FULL_NAME
+set cri.car_id = ci.CAR_ID
+where cri.car_id is null;
+
+# 자동차 id를 통해 리뷰 정보
+
+select
+    car_name '자동차 이름',
+    avg_score '평점',
+    survey_people_count '설문 인원수',
+    graph_info '그래프 정보'
+from car_review_info cri join car_info ci on cri.car_name = ci.CAR_FULL_NAME;
 
 
+# 리뷰 댓글 정보
 
+select
+    nickname '닉네임',
+    comment_avg_score '평점',
+    comment_text '댓글',
+    created_at '작성시간'
+from car_review_info cri join comment_info ci on cri.review_id = ci.review_id
