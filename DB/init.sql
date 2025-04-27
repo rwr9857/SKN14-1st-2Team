@@ -88,13 +88,6 @@ create table comment_info (
     created_at timestamp default current_timestamp
 );
 
-
-create table test01 (
-    id int auto_increment primary key ,
-    brand_name varchar(20) not null
-);
-
-
 insert into BRAND_INFO (BRAND_NAME)
 values
     ('현대'),
