@@ -129,7 +129,7 @@ if "background_cleared" not in st.session_state:
 if not st.session_state.background_cleared:
     set_background('../docs/background.png')
 
-st.image("../docs/차근차근 로고.png", width=150) # 차근차근 로고 적용
+st.image("차근차근_로고_(1).png", width=150) # 차근차근 로고 적용
 
 # DB 연결
 conn = team_db()
@@ -262,6 +262,7 @@ elif st.session_state.page == "balance":
         icons=["info-circle", "cash-coin", "ev-station", "car-front-fill", "heart"],
         orientation="horizontal",
         default_index=0,
+        key= "menu_selection",
         styles={
             "container": {"padding": "0!important", "background-color": "#F8B94A"},
             "icon": {"color": "#444", "font-size": "18px"},
