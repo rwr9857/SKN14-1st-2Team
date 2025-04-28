@@ -13,9 +13,22 @@ class CommentDAO:
         return [CommentDTO(review_id, *row) for row in result]
 
     def insert_comment(self, comment_dto):
-        query = """INSERT INTO comment_info (review_id, nickname, comment_avg_score, comment_text, created_at)
-                   VALUES (%s, %s, %s, %s, %s)"""
-        cursor = self.db_connection.cursor()
-        cursor.execute(query, (comment_dto.review_id, comment_dto.nickname, comment_dto.comment_avg_score,
-                               comment_dto.comment_text, comment_dto.created_at))
-        self.db_connection.commit()
+        try:
+            cursor = self.db_connection.cursor()
+            query = """INSERT INTO comment_info (review_id, nickname, comment_avg_score, comment_text, created_at)
+                       VALUES (%s, %s, %s, %s, %s)"""
+            cursor.execute(query, (
+                comment_dto.review_id,  # review_id를 사용하여 댓글과 리뷰를 연결
+                comment_dto.nickname,
+                comment_dto.comment_avg_score,
+                comment_dto.comment_text,
+                comment_dto.created_at
+            ))
+            self.db_connection.commit()
+
+            # 마지막으로 삽입된 comment의 id를 DTO에 설정
+            comment_dto.comment_id = cursor.lastrowid
+        except Exception as e:
+            print(f"Error while inserting comment: {e}")
+        finally:
+            cursor.close()
