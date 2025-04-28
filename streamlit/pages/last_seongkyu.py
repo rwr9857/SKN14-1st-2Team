@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 import pandas as pd
 import altair as alt
 
-
 # 환경변수 로드 (.env 파일)
 load_dotenv()
+
 
 # db 초기화 함수
 def team_db():
@@ -33,6 +33,7 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
+
 def set_background(png_file):
     # 절대 경로로 변경
     abs_path = os.path.abspath(png_file)
@@ -48,6 +49,7 @@ def set_background(png_file):
     </style>
     '''
     st.markdown(page_bg_img, unsafe_allow_html=True)
+
 
 # 기존에 정의한 set_background 함수 활용
 def clear_background():
@@ -123,7 +125,6 @@ def set_custom_styles():
     """, unsafe_allow_html=True)
 
 
-
 # 배경 초기화 상태 세팅
 if "background_cleared" not in st.session_state:
     st.session_state.background_cleared = False
@@ -132,11 +133,12 @@ if "background_cleared" not in st.session_state:
 if not st.session_state.background_cleared:
     set_background('../../docs/background.png')
 
-st.image("차근차근 로고.png", width=150) # 차근차근 로고 적용
+st.image("차근차근 로고.png", width=150)  # 차근차근 로고 적용
 
 # DB 연결
 conn = team_db()
 cur = conn.cursor(dictionary=True) if conn else None
+
 
 # 세션 상태 초기화
 def team_session():
@@ -157,15 +159,23 @@ def team_session():
         if key not in st.session_state:
             st.session_state[key] = value
 
+
 team_session()
+
 
 # 기본 정보와 차량 선택 저장 함수     todo init에서 작성 후 수정
 def save_user_info():
     try:
         cur.execute("""
-            INSERT INTO teamdb.user_info (USER_AGE, USER_GENDER,USER_PURPOSE,USER_ID, user_job)
+            INSERT INTO teamdb.user_info (USER_AGE, USER_GENDER, USER_PURPOSE, USER_ID, USER_JOB)
             VALUES (%s, %s, %s, %s, %s)
-        """, (st.session_state.age, st.session_state.gender,st.session_state.purpose, st.session_state.id, st.session_state.job))
+        """, (
+            st.session_state.age,
+            st.session_state.gender,
+            st.session_state.purpose,
+            st.session_state.id,
+            st.session_state.job  # 👈 여기 추가 (int형 user_job)
+        ))
         conn.commit()
     except mysql.connector.Error as e:
         st.error(f"DB 저장 실패: {e}")
@@ -244,6 +254,7 @@ def get_filtered_cars():
         st.text_area("쿼리문", query)
         return []
 
+
 def recommended_cars():
     try:
         cars = get_filtered_cars()
@@ -260,7 +271,6 @@ def recommended_cars():
 # 페이지 상태관리
 if "page" not in st.session_state:
     st.session_state.page = "home"
-
 
 # 첫 번째 페이지(찾으러 가기)
 if st.session_state.page == "home":
@@ -287,7 +297,7 @@ elif st.session_state.page == "balance":
         icons=["info-circle", "cash-coin", "ev-station", "car-front-fill", "heart"],
         orientation="horizontal",
         default_index=0,
-        key= "menu_selection",
+        key="menu_selection",
         styles={
             "container": {"padding": "0!important", "background-color": "#F8B94A"},
             "icon": {"color": "#444", "font-size": "18px"},
@@ -305,6 +315,19 @@ elif st.session_state.page == "balance":
         st.session_state.purpose = st.selectbox("주 사용 용도", ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"],
                                                 index=["출퇴근", "여행/나들이", "업무용", "주말 드라이브"].index(
                                                     st.session_state.purpose) if st.session_state.purpose else 0)
+        # 👉 직업 추가
+        job_options = {
+            "대학생": 1,
+            "사무직": 2,
+            "IT/개발": 3,
+            "서비스직": 4,
+            "생산직": 5,
+            "기타": 6
+        }
+        selected_job = st.selectbox("직업을 선택하세요", list(job_options.keys()))
+
+        # 선택한 직업을 세션에 저장 (int형 job_id로)
+        st.session_state.job = job_options[selected_job]
 
     elif selected == "예산 범위":
         st.markdown("### 차량 구매 예산")
@@ -373,8 +396,6 @@ elif st.session_state.page == "balance":
         st.write(f"3순위: **{st.session_state.third}**")
 
     # 모든 항목 완료 체크 및 다음 단계 버튼
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 👉 모든 입력을 마치셨나요?")
     required_fields = [
         st.session_state.age,
         st.session_state.gender,
@@ -385,7 +406,8 @@ elif st.session_state.page == "balance":
         st.session_state.body_type,
         st.session_state.first,
         st.session_state.second,
-        st.session_state.third
+        st.session_state.third,
+        st.session_state.job  # 👈 여기도 추가
     ]
 
     if st.sidebar.button("다음 페이지로 이동"):
@@ -400,19 +422,25 @@ elif st.session_state.page == "balance":
 
 # 추천 결과 페이지
 elif st.session_state.page == "recommendation":
-    st.markdown("<h1>나의 첫 차는?</h1>", unsafe_allow_html=True)
-
-    # 추천 차량 목록이 있는지 확인
     if "recommended_cars" in st.session_state and st.session_state.recommended_cars:
-        car = st.session_state.recommended_cars[0]  # 첫 번째 하나만 가져오기
+        # 🚨 추천 차량이 있을 때만 제목 출력
+        if 'id' in st.session_state and 'CAR_ID' in st.session_state.recommended_cars[0]:
+            save_recommendation(st.session_state.id, st.session_state.recommended_cars[0]['CAR_ID'])
+
+        st.markdown("<h1>나의 첫 차는?</h1>", unsafe_allow_html=True)
+
+        car = st.session_state.recommended_cars[0]
+
         with st.container():
             st.markdown(f'<div class="car-info-container">', unsafe_allow_html=True)
             col1, col2 = st.columns([1, 2])
+
             with col1:
                 if 'CAR_IMG_URL' in car and car['CAR_IMG_URL']:
                     st.image(car['CAR_IMG_URL'], width=300)
                 else:
                     st.image("대체이미지.png", width=300)
+
             with col2:
                 st.markdown(
                     f'<div class="car-info-header">{car["BRAND_NAME"]} {car["CAR_FULL_NAME"]}</div>',
@@ -420,11 +448,11 @@ elif st.session_state.page == "recommendation":
                 )
                 st.markdown('<div class="car-specs">', unsafe_allow_html=True)
 
-                price_in_million = car["CAR_PRICE"]
                 try:
-                    price_in_million = float(price_in_million)
+                    price_in_million = float(car["CAR_PRICE"])
                 except (ValueError, TypeError):
                     price_in_million = 0
+
                 st.markdown(
                     f'<div class="spec-item"><span class="spec-label">가격:</span> {price_in_million:,.1f}만원</div>',
                     unsafe_allow_html=True
@@ -447,15 +475,20 @@ elif st.session_state.page == "recommendation":
                         f'<div class="spec-item"><span class="spec-label">출력:</span> {car["CAR_HORSEPOWER"]}hp</div>',
                         unsafe_allow_html=True
                     )
+
                 st.markdown('</div>', unsafe_allow_html=True)
+
             st.markdown('</div>', unsafe_allow_html=True)
 
+        st.markdown("---")
+
         if st.button("다른 모델 추천 받기"):
-            # 추천 결과 등 이전 상태 초기화
-            if "recommended_cars" in st.session_state:
-                st.session_state.page = "차량 정보 조회"
-                st.rerun()
+            st.session_state.recommended_cars = []
+            st.session_state.page = "차량 정보 조회"
+            st.rerun()
+
     else:
+        # 🚨 추천 결과가 없으면 제목을 출력하지 않고 경고만
         st.warning("추천 차량이 없습니다. 새로운 조건으로 다시 시도해보세요.")
         if st.button("다시 설정하기"):
             st.session_state.page = "balance"
@@ -475,9 +508,11 @@ def get_distinct_values(query):
         conn.close()
 
 
-body_types = ["전체"] + get_distinct_values("SELECT DISTINCT bt.body_type_category FROM teamdb.body_type_info bt JOIN teamdb.car_info c ON bt.body_name = c.car_body_type"
-) # 중복 없이 4개만 나옴
-fuel_types = ["전체"] + get_distinct_values("SELECT DISTINCT f.fuel_type_name FROM teamdb.fuel_type_info f JOIN teamdb.car_info c ON f.fuel_type_id = c.car_fuel_type")
+body_types = ["전체"] + get_distinct_values(
+    "SELECT DISTINCT bt.body_type_category FROM teamdb.body_type_info bt JOIN teamdb.car_info c ON bt.body_name = c.car_body_type"
+    )  # 중복 없이 4개만 나옴
+fuel_types = ["전체"] + get_distinct_values(
+    "SELECT DISTINCT f.fuel_type_name FROM teamdb.fuel_type_info f JOIN teamdb.car_info c ON f.fuel_type_id = c.car_fuel_type")
 
 # --- 사이드바 메뉴 및 페이지 라우팅 ---
 if "page" not in st.session_state:
@@ -490,8 +525,6 @@ if st.sidebar.button("통계 정보"):
     st.session_state.page = "통계 정보"
 if st.sidebar.button("리뷰와 평점"):
     st.session_state.page = "리뷰와 평점"
-
-
 
 
 def get_review_summary():
@@ -508,6 +541,29 @@ def get_review_summary():
             cri.graph_info
         FROM teamdb.car_review_info cri
         JOIN teamdb.CAR_INFO ci ON cri.car_name = ci.CAR_FULL_NAME
+        """
+        cur.execute(query)
+        return cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+
+def get_filtered_reviews():
+    conn = team_db()
+    if conn is None:
+        return []
+    try:
+        cur = conn.cursor(dictionary=True)
+        query = """
+            SELECT
+                cri.car_name,
+                cri.avg_score,
+                cri.survey_people_count,
+                cri.graph_info,
+                bi.brand_name
+            FROM teamdb.car_review_info cri
+            JOIN teamdb.car_info ci ON cri.car_name = ci.car_full_name
+            JOIN teamdb.brand_info bi ON ci.car_brand = bi.brand_id
         """
         cur.execute(query)
         return cur.fetchall()
@@ -541,6 +597,7 @@ def get_comments_by_car(car_name):
         if conn:
             conn.close()
 
+
 # --- 필터 조건 변환 함수 ---
 def get_price_range(selected):
     if selected == "1000만원대":
@@ -557,7 +614,7 @@ def get_price_range(selected):
 # --- 차량 정보 조회 페이지 ---
 if st.session_state.page == "차량 정보 조회":
     # --- 필터 드롭다운 ---
-    col1, col2, col3, col4= st.columns([1, 1, 1, 1])
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     with col1:
         selected_body = st.selectbox("외형", body_types)
     with col2:
@@ -568,8 +625,6 @@ if st.session_state.page == "차량 정보 조회":
         selected_fuel = st.selectbox("유종", fuel_types)
 
     st.markdown("---")
-
-
 
 
     def get_min_efficiency(selected):
@@ -609,6 +664,7 @@ if st.session_state.page == "차량 정보 조회":
             query += f" AND f.FUEL_TYPE_NAME = '{fuel_type}'"
         query += f" ORDER BY c.CAR_PRICE LIMIT {limit} OFFSET {offset}"
         return query
+
 
     # --- 페이지네이션 상태 ---
     if "pagenation" not in st.session_state:
@@ -734,6 +790,7 @@ if st.session_state.page == "차량 정보 조회":
         with pagination_cols[0]:
             if st.button("이전", key="car_page_prev"):
                 set_pagenation(start_page - 1)
+                set_pagenation(start_page - 1)
     else:
         pagination_cols[0].markdown("&nbsp;")  # 빈칸
 
@@ -779,68 +836,48 @@ elif st.session_state.page == "리뷰와 평점":
 
 
     # --- 필터링 로직 ---
-    def get_filtered_cars():
-        try:
-            order_column = {
-                "연비 (최저)": "CAR_FUEL_EFFICIENCY",
-                "평점 (네이버 평점 기준)": "CAR_RATING",
-                "차체 크기 (실내 공간 기준 = 축거/전장*100)": "CAR_SIZE",
-                "성능 (출력-최저)": "CAR_HORSEPOWER"
-            }.get(st.session_state.first)
+    def get_filtered_reviews():
+        price_range = get_price_range(selected_price) if selected_price != "전체" else None
 
-            order_direction = "DESC" if st.session_state.first in ["평점 (네이버 평점 기준)", "차체 크기 (실내 공간 기준 = 축거/전장*100)",
-                                                                   "성능 (출력-최저)"] else "ASC"
+        query = """
+        SELECT 
+            cri.car_name,
+            cri.avg_score,
+            cri.survey_people_count,
+            cri.graph_info,
+            bi.BRAND_NAME,
+            bti.body_type_category
+        FROM teamdb.car_review_info cri
+        JOIN teamdb.car_info ci ON cri.car_name = ci.car_full_name
+        JOIN teamdb.brand_info bi ON ci.car_brand = bi.BRAND_ID
+        JOIN teamdb.body_type_info bti ON ci.CAR_BODY_TYPE = bti.body_name
+        WHERE 1=1
+        """
 
-            filters = []
-            params = []
+        # 필터 조건
+        if selected_body != "전체":
+            query += f" AND bti.body_type_category = '{selected_body}'"
+        if selected_brand != "전체":
+            query += f" AND bi.BRAND_NAME = '{selected_brand}'"
+        if price_range:
+            query += f" AND ci.CAR_PRICE BETWEEN {price_range[0]} AND {price_range[1]}"
 
-            filters.append("car_info.CAR_PRICE BETWEEN %s AND %s")
-            params.extend([st.session_state.min_val, st.session_state.max_val])
+        # 정렬 조건
+        query += f" ORDER BY {sort_options[selected_sort]}"
 
-            if st.session_state.body_type and st.session_state.body_type != "전체":
-                filters.append("body_info.body_type_category = %s")
-                params.append(st.session_state.body_type)
-
-            if st.session_state.fuel_type and st.session_state.fuel_type != "전체":
-                filters.append("fuel_info.fuel_type_name = %s")
-                params.append(st.session_state.fuel_type)
-
-            where_clause = " AND ".join(filters)
-
-            query = f"""
-                SELECT 
-                    brand_info.brand_name AS BRAND_NAME,
-                    car_info.CAR_FULL_NAME, 
-                    car_info.CAR_PRICE, 
-                    car_info.CAR_IMG_URL, 
-                    car_info.CAR_FUEL_EFFICIENCY, 
-                    car_info.CAR_HORSEPOWER,
-                    car_info.CAR_ENGINE_TYPE AS ENGINE_NAME,
-                    fuel_info.fuel_type_name AS FUEL_TYPE_NAME,
-                    body_info.body_type_category AS BODY_TYPE_NAME
-                FROM CAR_INFO car_info 
-                JOIN BRAND_INFO brand_info ON car_info.car_brand = brand_info.brand_id 
-                JOIN BODY_TYPE_INFO body_info ON car_info.car_body_type = body_info.body_name 
-                JOIN FUEL_TYPE_INFO fuel_info ON car_info.car_fuel_type = fuel_info.fuel_type_id
-                WHERE {where_clause}
-            """
-
-            if order_column:
-                query += f" ORDER BY {order_column} {order_direction}"
-
-            query += " LIMIT 1"  # 👈 여기 추가해서 딱 1개만 가져오게!
-
-            st.write("실행 쿼리:", query)
-            st.write("파라미터:", params)
-
-            cur.execute(query, tuple(params))
-            cars = cur.fetchall()
-            return cars
-
-        except mysql.connector.Error as e:
-            st.error(f"차량 추천 쿼리 실패: {e}")
-            st.text_area("쿼리문", query)
-            return []
+        conn = team_db()
+        reviews = []
+        if conn:
+            try:
+                cur = conn.cursor(dictionary=True)
+                cur.execute(query)
+                reviews = cur.fetchall()
+            except mysql.connector.Error as e:
+                st.error(f"리뷰 조회 실패: {e}")
+                st.text_area("실행 쿼리", query)  # 오류 발생 시 쿼리 내용 출력
+            finally:
+                conn.close()
+        return reviews
 
 
     # --- 필터 적용 후 데이터 조회 ---
@@ -975,3 +1012,133 @@ elif st.session_state.page == "리뷰와 평점":
 elif st.session_state.page == "통계 정보":
     st.header("통계 정보")
 
+# --- 추천 저장 함수 ---
+def save_recommendation(user_id, car_id):
+    conn = team_db()
+    if conn is None:
+        return
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO teamdb.car_recommendation_info (user_id, car_id)
+            VALUES (%s, %s)
+        """, (user_id, car_id))
+        conn.commit()
+    except mysql.connector.Error as e:
+        st.error(f"추천 저장 실패: {e}")
+    finally:
+        conn.close()
+
+
+# --- 통계 정보 페이지 ---
+if st.session_state.page == "통계 정보":
+    st.header("🚗 통계 정보")
+
+
+    def load_statistics():
+        conn = team_db()
+        if conn is None:
+            return pd.DataFrame()
+        try:
+            query = """
+                SELECT
+                    u.user_age,
+                    u.user_gender,
+                    j.job_name,
+                    c.car_full_name
+                FROM teamdb.car_recommendation_info r
+                JOIN teamdb.user_info u ON r.user_id = u.user_id
+                JOIN teamdb.car_info c ON r.car_id = c.car_id
+                LEFT JOIN teamdb.job_type_info j ON u.user_job = j.job_id
+            """
+            df = pd.read_sql(query, conn)
+            return df
+        except Exception as e:
+            st.error(f"통계 데이터 불러오기 실패: {e}")
+            return pd.DataFrame()
+        finally:
+            conn.close()
+
+
+    stats_df = load_statistics()
+
+    if stats_df.empty:
+        st.info("아직 추천받은 기록이 없습니다.")
+    else:
+        # ---------------------- 연령대별 ----------------------
+        st.subheader("📊 연령대별 선호 차량")
+
+        # 20대, 30대, 40대만 구간 설정
+        stats_df['age_group'] = pd.cut(stats_df['user_age'],
+                                       bins=[0, 29, 39, 49, 100],
+                                       labels=['20대', '30대', '40대', '기타'])
+        stats_df = stats_df[stats_df['age_group'].isin(['20대', '30대', '40대'])]
+
+        age_car = stats_df.groupby(['age_group', 'car_full_name']).size().reset_index(name='count')
+        top_age_car = age_car.sort_values(['age_group', 'count'], ascending=[True, False]).groupby('age_group').head(1)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            chart_age = alt.Chart(top_age_car).mark_bar().encode(
+                x=alt.X('age_group:N', title='연령대', axis=alt.Axis(labelAngle=0)),
+                y=alt.Y('count:Q', title='선호 차량 수'),
+                color='car_full_name:N',
+                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
+            ).properties(width=400, height=300)
+            st.altair_chart(chart_age, use_container_width=True)
+        with col2:
+            pie_age = alt.Chart(top_age_car).mark_arc().encode(
+                theta=alt.Theta(field='count', type='quantitative'),
+                color=alt.Color(field='car_full_name', type='nominal'),
+                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
+            ).properties(width=400, height=300)
+            st.altair_chart(pie_age, use_container_width=True)
+
+        # ---------------------- 성별별 ----------------------
+        st.subheader("📊 성별별 선호 차량")
+
+        gender_car = stats_df.groupby(['user_gender', 'car_full_name']).size().reset_index(name='count')
+        top_gender_car = gender_car.sort_values(['user_gender', 'count'], ascending=[True, False]).groupby(
+            'user_gender').head(3)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            chart_gender = alt.Chart(top_gender_car).mark_bar().encode(
+                x=alt.X('user_gender:N', title='성별', axis=alt.Axis(labelAngle=0)),
+                y=alt.Y('count:Q', title='선호 차량 수'),
+                color='car_full_name:N',
+                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
+            ).properties(width=400, height=300)
+            st.altair_chart(chart_gender, use_container_width=True)
+        with col2:
+            pie_gender = alt.Chart(top_gender_car).mark_arc().encode(
+                theta=alt.Theta(field='count', type='quantitative'),
+                color=alt.Color(field='car_full_name', type='nominal'),
+                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
+            ).properties(width=400, height=300)
+            st.altair_chart(pie_gender, use_container_width=True)
+
+        # ---------------------- 직업별 ----------------------
+        st.subheader("📊 직업별 선호 차량")
+
+        job_car = stats_df.groupby(['job_name', 'car_full_name']).size().reset_index(name='count')
+        # 직업이 있는 경우만 필터링
+        job_car = job_car[job_car['job_name'].notnull()]
+        top_job_car = job_car.sort_values(['job_name', 'count'], ascending=[True, False]).groupby('job_name').head(1)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            chart_job = alt.Chart(top_job_car).mark_bar().encode(
+                x=alt.X('job_name:N', title='직업', axis=alt.Axis(labelAngle=0)),
+                y=alt.Y('count:Q', title='선호 차량 수'),
+                color='car_full_name:N',
+                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
+            ).properties(width=400, height=300)
+            st.altair_chart(chart_job, use_container_width=True)
+        with col2:
+            pie_job = alt.Chart(top_job_car).mark_arc().encode(
+                theta=alt.Theta(field='count', type='quantitative'),
+                color=alt.Color(field='car_full_name', type='nominal'),
+                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
+            ).properties(width=400, height=300)
+            st.altair_chart(pie_job, use_container_width=True)
