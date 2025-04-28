@@ -169,7 +169,7 @@ def get_filtered_cars():
     try:
         query = f"""
             SELECT * FROM CAR_INFO 
-            WHERE CAR_PRICE BETWEEN {st.session_state.min_val * 10000} AND {st.session_state.max_val * 10000}
+            WHERE CAR_PRICE BETWEEN {st.session_state.min_val } AND {st.session_state.max_val }
             AND FUEL_TYPE_NAME = %s
             AND BODY_TYPE = %s
             ORDER BY 
