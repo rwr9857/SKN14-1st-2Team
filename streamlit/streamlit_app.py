@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # db 초기화 함수
-def init_db():
+def team_db():
     try:
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST"),
@@ -132,11 +132,11 @@ if not st.session_state.background_cleared:
 st.image("../docs/차근차근 로고.png", width=150) # 차근차근 로고 적용
 
 # DB 연결
-conn = init_db()
+conn = team_db()
 cur = conn.cursor(dictionary=True) if conn else None
 
 # 세션 상태 초기화
-def init_session():
+def team_session():
     default_values = {
         'age': 20,
         'gender': None,
@@ -154,69 +154,82 @@ def init_session():
         if key not in st.session_state:
             st.session_state[key] = value
 
-init_session()
+team_session()
 
 # 기본 정보와 차량 선택 저장 함수     todo init에서 작성 후 수정
 def save_user_info():
     try:
         cur.execute("""
-            INSERT INTO USER_INFO (USER_AGE, USER_GENDER), 
-            # USER_PURPOSE, USER_MIN_BUDGET, USER_MAX_BUDGET, 
+            INSERT INTO USER_INFO (USER_AGE, USER_GENDER, 
+            USER_PURPOSE)
+            # , USER_MIN_BUDGET, USER_MAX_BUDGET, 
             # USER_FUEL_TYPE, USER_BODY_TYPE, USER_FIRST_PREF, USER_SECOND_PREF, USER_THIRD_PREF)
-            VALUES (%s, %s)
-            # , %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (st.session_state.age, st.session_state.gender))
-              #                     , st.session_state.purpose,
+            VALUES (%s, %s, %s)
+            # , %s, %s, %s, %s, %s, %s, %s)
+        """, (st.session_state.age, st.session_state.gender,)
+                                  , st.session_state.purpose)
               # st.session_state.min_val, st.session_state.max_val, st.session_state.fuel_type,
               # st.session_state.body_type, st.session_state.first, st.session_state.second, st.session_state.third))
         conn.commit()
     except mysql.connector.Error as e:
         st.error(f"DB 저장 실패: {e}")
 
-# 차량 추천 함수 (예산, 연료, 바디타입, 선호도 순으로 정렬)
+
 def get_filtered_cars():
     try:
+        # 선호도 1순위로 정렬할 컬럼 매칭
+        order_column = {
+            "연비 (최저)": "CAR_FUEL_EFFICIENCY",
+            "평점 (네이버 평점 기준)": "CAR_RATING",
+            "차체 크기 (실내 공간 기준 = 축거/전장*100)": "CAR_SIZE",
+            "성능 (출력-최저)": "CAR_HORSEPOWER"
+        }.get(st.session_state.first)
+
+        # 정렬 방향 결정
+        if st.session_state.first in ["평점 (네이버 평점 기준)", "차체 크기 (실내 공간 기준 = 축거/전장*100)", "성능 (출력-최저)"]:
+            order_direction = "DESC"
+        else:
+            order_direction = "ASC"
+
+        # 기본적인 가격, 연료, 바디 타입 필터링
         query = f"""
-            SELECT * FROM CAR_INFO 
-            WHERE CAR_PRICE BETWEEN {st.session_state.min_val * 10000} AND {st.session_state.max_val * 10000}
-            AND FUEL_TYPE_NAME = %s
-            AND BODY_TYPE = %s
-            ORDER BY 
-                CASE WHEN {st.session_state.first} = '연비 (최저)' THEN CAR_FUEL_EFFICIENCY END,
-                CASE WHEN {st.session_state.first} = '가격 (최저)' THEN CAR_PRICE END,
-                CASE WHEN {st.session_state.first} = '평점 (네이버 평점 기준)' THEN CAR_RATING END,
-                CASE WHEN {st.session_state.first} = '차체 크기 (실내 공간 기준)' THEN CAR_SIZE END,
-                CASE WHEN {st.session_state.first} = '성능 (출력-최저)' THEN CAR_HORSEPOWER END
+            SELECT car_info.*
+            FROM CAR_INFO car_info
+            JOIN BODY_TYPE_INFO body_info
+              ON car_info.car_body_type = body_info.body_name
+            JOIN FUEL_TYPE_INFO fuel_info
+              ON car_info.car_fuel_type = fuel_info.fuel_type_id
+            WHERE car_info.CAR_PRICE BETWEEN %s AND %s
+              AND body_info.body_type_category = %s
+              AND fuel_info.fuel_type_name = %s
         """
-        cur.execute(query, (st.session_state.fuel_type, st.session_state.body_type))
+
+        if order_column:
+            query += f" ORDER BY {order_column} {order_direction}"
+
+        cur.execute(query, (
+            st.session_state.min_val ,  # 만원 → 원
+            st.session_state.max_val ,
+            st.session_state.fuel_type,
+            st.session_state.body_type
+        ))
+
         cars = cur.fetchall()
         return cars
+
     except mysql.connector.Error as e:
         st.error(f"차량 추천 쿼리 실패: {e}")
         return []
 
 
-# 추천 차량 세션
 def recommended_cars():
     try:
-        # 추천 차량을 가져와서 session_state에 저장
         cars = get_filtered_cars()
         st.session_state.recommended_cars = cars
         return cars
     except Exception as e:
         st.error(f"차량 추천 오류: {e}")
         return []
-
-
-# # 추천 차량 세션
-# def recommended_cars():
-#     try:
-#         cur.execute("select * from teamdb.CAR_INFO")
-#         cars = cur.fetchall()
-#         return cars
-#     except mysql.connector.Error as e:
-#         st.error(f'데이터베이스 쿼리 실패:{e}')
-#         return[]
 
 
 # 페이지 상태관리
@@ -388,7 +401,7 @@ elif st.session_state.page == "recommendation":
                     st.markdown('<div class="car-specs">', unsafe_allow_html=True)
 
                     # 가격 정보
-                    price_in_million = car["CAR_PRICE"] / 10000  # 원 단위에서 만원 단위로 변환
+                    price_in_million = car["CAR_PRICE"]  # 원 단위에서 만원 단위로 변환
                     st.markdown(
                         f'<div class="spec-item"><span class="spec-label">가격:</span> {price_in_million:,.1f}만원</div>',
                         unsafe_allow_html=True)
