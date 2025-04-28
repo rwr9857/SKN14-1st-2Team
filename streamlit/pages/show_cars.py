@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from PIL import Image
 
+
 load_dotenv()
 
 
@@ -93,8 +94,8 @@ def get_comments_by_car(car_name):
             ci.comment_avg_score,
             ci.comment_text,
             ci.created_at
-        FROM comment_info ci
-        JOIN car_review_info cri ON cri.review_id = ci.review_id
+        FROM teamdb.comment_info ci
+        JOIN teamdb.car_review_info cri ON cri.review_id = ci.review_id
         WHERE cri.car_name = %s
         """
         cur.execute(query, (car_name,))
@@ -158,7 +159,7 @@ if st.session_state.page == "차량 정보 조회":
             c.CAR_FUEL_EFFICIENCY,
             c.CAR_IMG_URL
         FROM teamdb.CAR_INFO c
-        JOIN teamdb.BRAND_INFO b ON c.brand_id = b.BRAND_ID
+        JOIN teamdb.BRAND_INFO b ON c.car_brand = b.BRAND_ID
         JOIN teamdb.BODY_TYPE_INFO bt ON c.CAR_BODY_TYPE = bt.body_name
         JOIN teamdb.FUEL_TYPE_INFO f ON c.CAR_FUEL_TYPE = f.FUEL_TYPE_ID
         WHERE 1=1
@@ -301,71 +302,83 @@ elif st.session_state.page == "리뷰와 평점":
 
     reviews = get_review_summary()
 
+    # 차량명별로 리뷰 중복 없이 한 번만 표시
+    unique_car_reviews = {}
+    for review in reviews:
+        car_name = review['car_name']
+        if car_name not in unique_car_reviews:
+            unique_car_reviews[car_name] = review
+    unique_reviews = list(unique_car_reviews.values())
+
     # 리뷰 페이지네이션 상태
     if "review_pagenation" not in st.session_state:
         st.session_state.review_pagenation = 1
-
 
     def set_review_pagenation(p):
         st.session_state.review_pagenation = p
         st.rerun()
 
-
     # 페이지네이션 설정
-    review_page_size = 4  # 한 페이지에 보여줄 리뷰 수
-    total_reviews = len(reviews)
+    review_page_size = 4  # 한 페이지에 보여줄 차량 수
+    total_reviews = len(unique_reviews)
     total_review_pages = (total_reviews + review_page_size - 1) // review_page_size if total_reviews > 0 else 1
 
-    # 현재 페이지에 표시할 리뷰 계산
+    # 현재 페이지에 표시할 차량 계산
     start_idx = (st.session_state.review_pagenation - 1) * review_page_size
     end_idx = start_idx + review_page_size
-    current_reviews = reviews[start_idx:end_idx] if reviews else []
+    current_reviews = unique_reviews[start_idx:end_idx] if unique_reviews else []
 
-    if reviews:
-        # 현재 페이지의 리뷰만 표시
+
+    if unique_reviews:
+        # 현재 페이지의 차량별 리뷰만 표시
         for i, review in enumerate(current_reviews):
-            cols = st.columns(1)  # 1열만
-            with cols[0]:
-                st.markdown(f"### {review['car_name']}")
-                st.metric("평균 평점", f"{review['avg_score']:.1f} ⭐️")
-                st.write(f"설문 참여 인원: {review['survey_people_count']}명")
+            car_name = review['car_name']
+            st.markdown(f"### {car_name}")
+            st.metric("평균 평점", f"{review['avg_score']:.1f} ⭐️")
+            st.write(f"설문 참여 인원: {review['survey_people_count']}명")
 
-                # 그래프
-                graph_data = {}
-                for line in review['graph_info'].split(','):
-                    parts = line.strip().split('\n')
-                    if len(parts) == 2:
-                        key = parts[0].strip()
-                        value = parts[1].strip()
-                        try:
-                            graph_data[key] = float(value)
-                        except ValueError:
-                            continue
+            # 그래프 데이터 파싱
+            graph_data = {}
+            for line in review['graph_info'].split(','):
+                parts = line.strip().split('\n')
+                if len(parts) == 2:
+                    key = parts[0].strip()
+                    value = parts[1].strip()
+                    try:
+                        graph_data[key] = float(value)
+                    except ValueError:
+                        continue
 
-                if graph_data:
-                    st.bar_chart(graph_data)
+            # 그래프 표시 (원래대로)
+            if graph_data:
+                st.bar_chart(graph_data)
 
-                # 댓글 보기 상태 관리
-                if f"show_comments_{review['car_name']}" not in st.session_state:
-                    st.session_state[f"show_comments_{review['car_name']}"] = False
+            # 리뷰 전체 보기 버튼
+            if f"show_reviews_{car_name}" not in st.session_state:
+                st.session_state[f"show_reviews_{car_name}"] = False
 
-                # 댓글 보기 버튼
-                if st.button(f"{review['car_name']} 댓글 보기", key=f"review_comment_{i}"):
-                    st.session_state[f"show_comments_{review['car_name']}"] = not st.session_state[
-                        f"show_comments_{review['car_name']}"]
-                    st.rerun()
+            if st.button(f"{car_name} 리뷰 전체 보기", key=f"review_btn_{i}"):
+                st.session_state[f"show_reviews_{car_name}"] = not st.session_state[f"show_reviews_{car_name}"]
+                st.rerun()
 
-                # 댓글 표시
-                if st.session_state[f"show_comments_{review['car_name']}"]:
-                    comments = get_comments_by_car(review['car_name'])
-                    if comments:
-                        for comment in comments:
-                            st.markdown(
-                                f"**{comment['nickname']}** ({comment['comment_avg_score']}⭐️) - {comment['created_at']}")
-                            st.write(comment['comment_text'])
-                            st.markdown("---")
-                    else:
-                        st.write("댓글이 없습니다.")
+            # 리뷰 펼치기 (해당 차량의 모든 리뷰)
+            if st.session_state[f"show_reviews_{car_name}"]:
+                all_reviews = [r for r in reviews if r['car_name'] == car_name]
+                for idx, r in enumerate(all_reviews, 1):
+                    st.markdown(f"**[리뷰 {idx}]** 평균 평점: {r['avg_score']} / 참여: {r['survey_people_count']}명")
+                    st.write(r.get('graph_info', ''))
+                    st.markdown("---")
+                # 댓글도 같이 표시
+                comments = get_comments_by_car(car_name)
+                if comments:
+                    st.markdown("#### 댓글")
+                    for comment in comments:
+                        st.markdown(f"**{comment['nickname']}** ({comment['comment_avg_score']}⭐️) - {comment['created_at']}")
+                        st.write(comment['comment_text'])
+                        st.markdown("---")
+                else:
+                    st.write("댓글이 없습니다.")
+
     else:
         st.info("리뷰 정보가 없습니다.")
 
@@ -390,7 +403,6 @@ elif st.session_state.page == "리뷰와 평점":
         # 페이지 번호 버튼들
         for idx, p in enumerate(range(start_page, end_page + 1)):
             with pagination_cols[idx + 1]:
-                # 현재 페이지 강조 또는 버튼 생성
                 if p == st.session_state.review_pagenation:
                     st.markdown(f"**[{p}]**")
                 else:
@@ -404,7 +416,6 @@ elif st.session_state.page == "리뷰와 평점":
                     set_review_pagenation(end_page + 1)
         else:
             pagination_cols[-1].markdown("&nbsp;")
-
 # --- 통계 정보 페이지(예시) ---
 elif st.session_state.page == "통계 정보":
     st.header("통계 정보")
