@@ -102,5 +102,5 @@ st.markdown("""
 
 # 반드시 Streamlit 버튼으로!
 if st.button("찾으러 가기"):
-    st.switch_page("pages/second_page.py")  # pages/second_page.py가 존재해야 함
+    st.switch_page("pages/second_page2.py")  # pages/second_page.py가 존재해야 함
 

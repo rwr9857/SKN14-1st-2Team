@@ -64,6 +64,3 @@ INSERT INTO JOB_TYPE_INFO (job_name) VALUES
 ('생산직'),
 ('기타');
 
-SHOW TABLES;
-SHOW CREATE TABLE 테이블명;
-DESCRIBE teamdb;
