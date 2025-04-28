@@ -7,7 +7,7 @@ from PIL import Image
 load_dotenv()
 
 
-def init_db():
+def team_db():
     try:
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST"),
@@ -24,7 +24,7 @@ def init_db():
 
 # --- 필터용 고유값 조회 함수 ---
 def get_distinct_values(query):
-    conn = init_db()
+    conn = team_db()
     if conn is None:
         return []
     try:
@@ -35,9 +35,9 @@ def get_distinct_values(query):
         conn.close()
 
 
-body_types = ["전체"] + get_distinct_values("SELECT BODY_TYPE_NAME FROM teamdb.BODY_TYPE_INFO")
-fuel_types = ["전체"] + get_distinct_values("SELECT FUEL_TYPE_NAME FROM teamdb.FUEL_TYPE_INFO")
-model_types = ["전체"] + get_distinct_values("SELECT MODEL_TYPE_NAME FROM teamdb.MODEL_TYPE_INFO")
+body_types = ["전체"] + get_distinct_values("SELECT DISTINCT bt.body_type_category FROM teamdb.body_type_info bt JOIN teamdb.car_info c ON bt.body_name = c.car_body_type"
+) # 중복 없이 4개만 나옴
+fuel_types = ["전체"] + get_distinct_values("SELECT DISTINCT f.fuel_type_name FROM teamdb.fuel_type_info f JOIN teamdb.car_info c ON f.fuel_type_id = c.car_fuel_type")
 
 # --- 사이드바 메뉴 및 페이지 라우팅 ---
 if "page" not in st.session_state:
@@ -60,7 +60,7 @@ except FileNotFoundError:
 
 
 def get_review_summary():
-    conn = init_db()
+    conn = team_db()
     if conn is None:
         return []
     try:
@@ -77,29 +77,34 @@ def get_review_summary():
         cur.execute(query)
         return cur.fetchall()
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
 def get_comments_by_car(car_name):
-    conn = init_db()
+    conn = team_db()
     if conn is None:
         return []
     try:
         cur = conn.cursor(dictionary=True)
-        query = f"""
+        query = """
         SELECT
             ci.nickname,
             ci.comment_avg_score,
             ci.comment_text,
             ci.created_at
-        FROM car_review_info cri
-        JOIN comment_info ci ON cri.review_id = ci.review_id
-        WHERE cri.car_name = '{car_name}'
+        FROM comment_info ci
+        JOIN car_review_info cri ON cri.review_id = ci.review_id
+        WHERE cri.car_name = %s
         """
-        cur.execute(query)
+        cur.execute(query, (car_name,))
         return cur.fetchall()
+    except mysql.connector.Error as e:
+        st.error(f"댓글 정보 조회 실패: {e}")
+        return []
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
 # --- 차량 정보 조회 페이지 ---
@@ -111,10 +116,8 @@ if st.session_state.page == "차량 정보 조회":
     with col2:
         selected_price = st.selectbox("가격", ["전체", "1000만원대", "2000만원대", "3000만원대", "4000만원 이상"])
     with col3:
-        selected_model = st.selectbox("차종", model_types)
-    with col4:
         selected_eff = st.selectbox("연비", ["전체", "10이하", "10~15", "15이상"])
-    with col5:
+    with col4:
         selected_fuel = st.selectbox("유종", fuel_types)
 
     st.markdown("---")
@@ -144,23 +147,19 @@ if st.session_state.page == "차량 정보 조회":
 
 
     # --- make_query 함수 ---
-    def make_query(price_range=None, min_efficiency=None, body_type=None, model_type=None, fuel_type=None, limit=8,
-                   offset=0):
+    def make_query(price_range=None, min_efficiency=None, body_type=None, fuel_type=None, limit=8, offset=0):
         query = """
         SELECT
-            c.CAR_ID,
             c.CAR_FULL_NAME,
             b.BRAND_NAME,
-            m.MODEL_TYPE_NAME,
-            bt.BODY_TYPE_NAME,
+            bt.body_type_category,
             f.FUEL_TYPE_NAME,
             c.CAR_PRICE,
             c.CAR_FUEL_EFFICIENCY,
             c.CAR_IMG_URL
         FROM teamdb.CAR_INFO c
-        JOIN teamdb.BRAND_INFO b ON c.CAR_BRAND = b.BRAND_ID
-        JOIN teamdb.MODEL_TYPE_INFO m ON c.CAR_MODEL = m.MODEL_TYPE_ID
-        JOIN teamdb.BODY_TYPE_INFO bt ON c.CAR_BODY_TYPE = bt.BODY_TYPE_ID
+        JOIN teamdb.BRAND_INFO b ON c.brand_id = b.BRAND_ID
+        JOIN teamdb.BODY_TYPE_INFO bt ON c.CAR_BODY_TYPE = bt.body_name
         JOIN teamdb.FUEL_TYPE_INFO f ON c.CAR_FUEL_TYPE = f.FUEL_TYPE_ID
         WHERE 1=1
         """
@@ -169,14 +168,11 @@ if st.session_state.page == "차량 정보 조회":
         if min_efficiency is not None:
             query += f" AND c.CAR_FUEL_EFFICIENCY >= {min_efficiency}"
         if body_type and body_type != "전체":
-            query += f" AND bt.BODY_TYPE_NAME = '{body_type}'"
-        if model_type and model_type != "전체":
-            query += f" AND m.MODEL_TYPE_NAME = '{model_type}'"
+            query += f" AND bt.BODY_type_category = '{body_type}'"
         if fuel_type and fuel_type != "전체":
             query += f" AND f.FUEL_TYPE_NAME = '{fuel_type}'"
         query += f" ORDER BY c.CAR_PRICE LIMIT {limit} OFFSET {offset}"
         return query
-
 
     # --- 페이지네이션 상태 ---
     if "pagenation" not in st.session_state:
@@ -196,13 +192,12 @@ if st.session_state.page == "차량 정보 조회":
         price_range=get_price_range(selected_price) if selected_price != "전체" else None,
         min_efficiency=get_min_efficiency(selected_eff) if selected_eff != "전체" else None,
         body_type=selected_body if selected_body != "전체" else None,
-        model_type=selected_model if selected_model != "전체" else None,
         fuel_type=selected_fuel if selected_fuel != "전체" else None,
         limit=page_size,
         offset=offset
     )
 
-    conn = init_db()
+    conn = team_db()
     cars_from_db = []
     if conn:
         try:
@@ -243,7 +238,6 @@ if st.session_state.page == "차량 정보 조회":
         price_range=get_price_range(selected_price) if selected_price != "전체" else None,
         min_efficiency=get_min_efficiency(selected_eff) if selected_eff != "전체" else None,
         body_type=selected_body if selected_body != "전체" else None,
-        model_type=selected_model if selected_model != "전체" else None,
         fuel_type=selected_fuel if selected_fuel != "전체" else None,
         limit=1000000,  # 큰 숫자로 설정
         offset=0
@@ -252,7 +246,7 @@ if st.session_state.page == "차량 정보 조회":
     # 마지막 ORDER BY 부분과 LIMIT 부분 제거
     total_query = total_query.split("ORDER BY")[0] + "ORDER BY 1"
 
-    conn = init_db()
+    conn = team_db()
     total_cars = 0
     if conn:
         try:
@@ -320,11 +314,11 @@ elif st.session_state.page == "리뷰와 평점":
     # 페이지네이션 설정
     review_page_size = 4  # 한 페이지에 보여줄 리뷰 수
     total_reviews = len(reviews)
-    total_review_pages = (total_reviews - 1) // review_page_size + 1 if total_reviews > 0 else 1
+    total_review_pages = (total_reviews + review_page_size - 1) // review_page_size if total_reviews > 0 else 1
 
     # 현재 페이지에 표시할 리뷰 계산
     start_idx = (st.session_state.review_pagenation - 1) * review_page_size
-    end_idx = min(start_idx + review_page_size, total_reviews)
+    end_idx = start_idx + review_page_size
     current_reviews = reviews[start_idx:end_idx] if reviews else []
 
     if reviews:
@@ -351,9 +345,18 @@ elif st.session_state.page == "리뷰와 평점":
                 if graph_data:
                     st.bar_chart(graph_data)
 
-                # 자세히 보기 버튼 - 고유 키 사용
-                display_idx = start_idx + i  # 전체 리스트 기준 인덱스
-                if st.button(f"{review['car_name']} 댓글 보기", key=f"review_comment_{display_idx}"):
+                # 댓글 보기 상태 관리
+                if f"show_comments_{review['car_name']}" not in st.session_state:
+                    st.session_state[f"show_comments_{review['car_name']}"] = False
+
+                # 댓글 보기 버튼
+                if st.button(f"{review['car_name']} 댓글 보기", key=f"review_comment_{i}"):
+                    st.session_state[f"show_comments_{review['car_name']}"] = not st.session_state[
+                        f"show_comments_{review['car_name']}"]
+                    st.rerun()
+
+                # 댓글 표시
+                if st.session_state[f"show_comments_{review['car_name']}"]:
                     comments = get_comments_by_car(review['car_name'])
                     if comments:
                         for comment in comments:
