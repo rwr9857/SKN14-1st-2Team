@@ -49,15 +49,37 @@
 | 분류 | 기술/도구                                                                                                                                                                                                                                                                                                          |
 |------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 언어 | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)                                                                                                                                                                                                          |
-| 라이브러리 | ![Selenium](https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=selenium&logoColor=green)                                                                                                                                                                                                    |
-| 데이터베이스 | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=blue)                                                                                                                                                                                                              |
+| 데이터크롤링 | ![Selenium](https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=selenium&logoColor=green)                                                                                                                                                                                                    |
+| 데이터베이스 | ![MySQL](https://img.shields.io/badge/MySQL-4B8BBE?style=for-the-badge&logo=mysql&logoColor=white)                                                                                                                                                                                                              |
 | 웹 | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)                                                                                                                                                                                                 |
 | 협업 툴 | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white),![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white),![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white) |
 
 
 ## 2-3. 📝 요구사항 명세서
 
-- 추후 기입 예정
+### 사용자 관련
+- 사용자는 예산범위, 사용용도 등을 기반으로 자동차 추천을 받을 수 있다.
+- 사용자의 정보는 `사용자 정보` 테이블에 저장된다.
+- 사용자의 직업은 `직업 타입 정보` 테이블을 참조한다.
+
+### 추천 시스템
+- 추천 결과는 `차 추천 정보` 테이블에 저장된다.
+- 추천은 `사용자`와 `자동차` 의 매칭으로 기록된다.
+
+### 자동차 정보 관리
+- 자동차 기본 정보는 `자동차 정보` 테이블에 저장된다.
+- 자동차 정보에는 브랜드, 연료 종류, 차종 등의 세부 항목이 포함된다.
+- 자동차 브랜드는 `브랜드 정보` 테이블을 참조한다.
+- 연료 종류는 `연료 타입 정보` 테이블을 참조한다.
+- 차종(바디 타입)은 `바디 타입 정보` 테이블을 참조한다.
+
+### 자동차 리뷰 관리
+- 각 자동차에 대한 리뷰는 `차 리뷰 정보` 테이블에 저장된다.
+- 리뷰에는 `평균 점수`, `설문 참여자 수` 등이 포함된다.
+
+### 댓글 기능
+- 리뷰에 댓글을 남길 수 있다.
+- 댓글 데이터는 `댓글 정보` 테이블에 저장되며, 닉네임과 점수, 작성 일자 등이 포함된다.
 
 ## 2-4. 🗃️ 테이블 정의서
 
