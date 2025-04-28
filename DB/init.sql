@@ -1,24 +1,19 @@
-DROP TABLE IF EXISTS USER_INFO;
-DROP TABLE IF EXISTS CAR_INFO;
-DROP TABLE IF EXISTS FUEL_TYPE_INFO;
-DROP TABLE IF EXISTS MODEL_TYPE_INFO;
-DROP TABLE IF EXISTS BODY_TYPE_INFO;
-DROP TABLE IF EXISTS ENGINE_INFO;
-DROP TABLE IF EXISTS BRAND_INFO;
-drop table if exists car_review_info;
-drop table if exists comment_info;
+# DROP TABLE IF EXISTS USER_INFO;
+# DROP TABLE IF EXISTS CAR_INFO;
+# DROP TABLE IF EXISTS FUEL_TYPE_INFO;
+# DROP TABLE IF EXISTS MODEL_TYPE_INFO;
+# DROP TABLE IF EXISTS BODY_TYPE_INFO;
+# DROP TABLE IF EXISTS ENGINE_INFO;
+# DROP TABLE IF EXISTS BRAND_INFO;
+# drop table if exists car_review_info;
+# drop table if exists comment_info;
+# drop table if exists job_type_info;
 
 -- 브랜드 정보
 CREATE TABLE BRAND_INFO (
     BRAND_ID INT AUTO_INCREMENT PRIMARY KEY ,
     BRAND_NAME VARCHAR(30) NOT NULL
 );
-
-# -- 엔진 정보 # 엔진정보 ex) l4 자연흡기 이런거 뺌 car_info 에 넣을 예정
-# CREATE TABLE ENGINE_INFO (
-#     ENGINE_ID INT AUTO_INCREMENT PRIMARY KEY ,
-#     ENGINE_NAME VARCHAR(30) NOT NULL
-# );
 
 -- 바디 타입 정보
 CREATE TABLE BODY_TYPE_INFO (
@@ -36,6 +31,12 @@ CREATE TABLE MODEL_TYPE_INFO (
 CREATE TABLE FUEL_TYPE_INFO (
     FUEL_TYPE_ID INT AUTO_INCREMENT PRIMARY KEY ,
     FUEL_TYPE_NAME VARCHAR(30) NOT NULL
+);
+
+-- 직업정보
+create table JOB_TYPE_INFO (
+    job_id int auto_increment primary key ,
+    job_name varchar(20)
 );
 
 -- 자동차 정보
@@ -56,7 +57,6 @@ CREATE TABLE CAR_INFO (
     FOREIGN KEY (CAR_MODEL) REFERENCES MODEL_TYPE_INFO(MODEL_TYPE_ID),
     FOREIGN KEY (CAR_BRAND) REFERENCES  BRAND_INFO(BRAND_ID),
     FOREIGN KEY (CAR_BODY_TYPE) REFERENCES BODY_TYPE_INFO(BODY_TYPE_ID),
-#     FOREIGN KEY (CAR_ENGINE_TYPE) REFERENCES ENGINE_INFO(ENGINE_ID),
     FOREIGN KEY (CAR_FUEL_TYPE) REFERENCES FUEL_TYPE_INFO(FUEL_TYPE_ID)
 );
 
@@ -65,10 +65,21 @@ CREATE TABLE USER_INFO (
     USER_ID INT AUTO_INCREMENT PRIMARY KEY ,
     USER_AGE INT NOT NULL ,
     USER_GENDER VARCHAR(10) NOT NULL CHECK (USER_GENDER IN ('남', '여')),
-    CAR_ID INT NOT NULL,
-    FOREIGN KEY (CAR_ID) REFERENCES CAR_INFO(CAR_ID)
+    user_job int NOT NULL ,
+    user_purpose VARCHAR(20) NOT NULL ,
+    foreign key (user_job) references JOB_TYPE_INFO(job_id)
 );
 
+-- 유저가 받은 추천차
+CREATE TABLE car_recommendation_info (
+    reco_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    car_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id),
+    FOREIGN KEY (car_id) REFERENCES car_info(car_id)
+);
+
+-- 차의 리뷰
 create table car_review_info (
     review_id int auto_increment primary key ,
     car_id int,
@@ -79,13 +90,14 @@ create table car_review_info (
     foreign key (car_id) references car_info(car_id)
 );
 
+-- 리뷰의 댓글
 create table comment_info (
     comment_id int auto_increment primary key ,
     review_id int not null,
     nickname varchar(20) not null,
     comment_avg_score float,
-    comment_text varchar(200),
-    created_at timestamp default current_timestamp
+    comment_text varchar(300),
+    created_at varchar(20)
 );
 
 INSERT INTO JOB_TYPE_INFO (job_name) VALUES
@@ -95,23 +107,4 @@ INSERT INTO JOB_TYPE_INFO (job_name) VALUES
 ('서비스직'),
 ('생산직'),
 ('기타');
-
-insert into model_type_info (MODEL_TYPE_NAME)
-values ('모닝'),
-       ('레이'),
-       ('스파크'),
-       ('아반떼'),
-       ('K3'),
-       ('K5'),
-       ('K8'),
-       ('쏘나타'),
-       ('그랜저'),
-       ('아이오닉'),
-       ('제네시스');
-
-insert into fuel_type_info(FUEL_TYPE_NAME)
-values ('디젤'),
-       ('가솔린'),
-       ('하이브리드'),
-       ('전기차');
 
