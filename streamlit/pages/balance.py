@@ -172,6 +172,7 @@ elif st.session_state.page == "balance":
         icons=["info-circle", "cash-coin", "ev-station", "car-front-fill", "heart"],
         orientation="horizontal",
         default_index=0,
+        key="menu_selection",
         styles={
             "container": {"padding": "0!important", "background-color": "#F8B94A"},
             "icon": {"color": "#444", "font-size": "18px"},
