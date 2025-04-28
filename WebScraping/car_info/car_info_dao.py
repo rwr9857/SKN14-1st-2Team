@@ -9,10 +9,14 @@ from bs4 import BeautifulSoup as bs
 import re
 import time
 from WebScraping.car_info.car_info_dto import CarInfo
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 class CarInfoDAO:
     def __init__(self):
-        self.driver = webdriver.Chrome()
+        # self.driver = webdriver.Chrome()
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=service)
         self.car_info_list = []
         self.url_list = []
 
