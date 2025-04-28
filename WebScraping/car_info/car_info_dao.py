@@ -45,7 +45,7 @@ class CarInfoDAO:
     def collect_urls(self):
         for page in range(1, 16):
             try:
-                container = self.driver.find_element(By.XPATH, f'//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[3]/div[{page}]')
+                container = self.driver.find_element(By.XPATH, f'//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[3]/div[' + str(page) + ']')
                 car_list = container.find_elements(By.CSS_SELECTOR, ".info_box")
 
                 for car_tag in car_list:
