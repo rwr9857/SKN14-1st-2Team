@@ -8,7 +8,8 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup as bs
 import re
 import time
-from dto.car_info import CarInfo
+from WebScraping.car_info.car_info_dto import CarInfo
+# from dto.car_info import CarInfo
 
 class CarInfoDAO:
     def __init__(self):

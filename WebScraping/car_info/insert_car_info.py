@@ -19,3 +19,5 @@ for row in rows:
 cursor.close()
 conn.close()
 
+
+
