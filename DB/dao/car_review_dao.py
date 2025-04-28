@@ -21,6 +21,7 @@ class CarReviewDAO:
             car_review.car_name, car_review.avg_score, car_review.survey_people_count, car_review.graph_info))
             self.db_connection.commit()
             car_review.review_id = cursor.lastrowid # 마지막 id 찾기
+            return car_review.review_id
         except Exception as e:
             print(f"Error while inserting car review: {e}")
         finally:

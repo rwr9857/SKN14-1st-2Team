@@ -88,38 +88,13 @@ create table comment_info (
     created_at timestamp default current_timestamp
 );
 
-
-# create table test01 (
-#     id int auto_increment primary key ,
-#     brand_name varchar(20) not null
-# );
-
-
-insert into BRAND_INFO (BRAND_NAME)
-values
-    ('현대'),
-    ('기아'),
-    ('제네시스'),
-    ('르노코리아'),
-    ('KGM'),
-    ('폭스바겐'),
-    ('메르세데스 벤츠'),
-    ('BMW'),
-    ('아우디'),
-    ('토요타'),
-    ('혼다'),
-    ('볼보'),
-    ('미니'),
-    ('쉐보레'),
-    ('지프'),
-    ('르노'), # 뭐가 다른지 모르겠음
-    ('푸조');
-
-insert into body_type_info (BODY_TYPE_NAME)
-values ('경차'),
-       ('승용차'),
-       ('SUV'),
-       ('기타');
+INSERT INTO JOB_TYPE_INFO (job_name) VALUES
+('대학생'),
+('사무직'),
+('IT/개발'),
+('서비스직'),
+('생산직'),
+('기타');
 
 insert into model_type_info (MODEL_TYPE_NAME)
 values ('모닝'),
