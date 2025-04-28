@@ -9,6 +9,7 @@ drop table if exists car_review_info;
 drop table if exists comment_info;
 # drop table if exists job_type_info;
 
+
 -- 직업정보
 create table JOB_TYPE_INFO (
     job_id int auto_increment primary key ,
