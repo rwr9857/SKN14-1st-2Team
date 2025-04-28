@@ -23,6 +23,9 @@ def init_db():
         st.error(f"DB 연결 실패: {e}")
         return None
 
+# DB 연결
+conn = init_db()
+cur = conn.cursor(dictionary=True) if conn else None
 
 # 배경 이미지 설정 함수 (Base64) - gpt
 def get_base64_of_bin_file(bin_file):
@@ -120,15 +123,6 @@ def set_custom_styles():
     """, unsafe_allow_html=True)
 
 
-
-# 배경 초기화 상태 세팅
-if "background_cleared" not in st.session_state:
-    st.session_state.background_cleared = False
-
-# 초기 배경 이미지 설정 (background_cleared가 False일 때만)
-if not st.session_state.background_cleared:
-    set_background('../docs/background.png')
-
 st.image("../docs/차근차근 로고.png", width=150) # 차근차근 로고 적용
 
 # DB 연결
@@ -143,7 +137,7 @@ def init_session():
         'purpose': None,
         'min_val': 1000,
         'max_val': 5000,
-        'fuel_type': None,
+        'engine_type': None,
         'body_type': None,
         'first': None,
         'second': None,
@@ -156,19 +150,16 @@ def init_session():
 
 init_session()
 
-# 기본 정보와 차량 선택 저장 함수     todo init에서 작성 후 수정
+# 기본 정보와 차량 선택 저장 함수
 def save_user_info():
     try:
         cur.execute("""
-            INSERT INTO USER_INFO (USER_AGE, USER_GENDER), 
-            # USER_PURPOSE, USER_MIN_BUDGET, USER_MAX_BUDGET, 
-            # USER_FUEL_TYPE, USER_BODY_TYPE, USER_FIRST_PREF, USER_SECOND_PREF, USER_THIRD_PREF)
-            VALUES (%s, %s)
-            # , %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (st.session_state.age, st.session_state.gender))
-              #                     , st.session_state.purpose,
-              # st.session_state.min_val, st.session_state.max_val, st.session_state.fuel_type,
-              # st.session_state.body_type, st.session_state.first, st.session_state.second, st.session_state.third))
+            INSERT INTO USER_INFO (USER_AGE, USER_GENDER, USER_PURPOSE, USER_MIN_BUDGET, USER_MAX_BUDGET, 
+            USER_ENGINE_TYPE, USER_BODY_TYPE, USER_FIRST_PREF, USER_SECOND_PREF, USER_THIRD_PREF)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (st.session_state.age, st.session_state.gender, st.session_state.purpose,
+              st.session_state.min_val, st.session_state.max_val, st.session_state.engine_type,
+              st.session_state.body_type, st.session_state.first, st.session_state.second, st.session_state.third))
         conn.commit()
     except mysql.connector.Error as e:
         st.error(f"DB 저장 실패: {e}")
@@ -188,13 +179,12 @@ def get_filtered_cars():
                 CASE WHEN {st.session_state.first} = '차체 크기 (실내 공간 기준)' THEN CAR_SIZE END,
                 CASE WHEN {st.session_state.first} = '성능 (출력-최저)' THEN CAR_HORSEPOWER END
         """
-        cur.execute(query, (st.session_state.fuel_type, st.session_state.body_type))
+        cur.execute(query, (st.session_state.engine_type, st.session_state.body_type))
         cars = cur.fetchall()
         return cars
     except mysql.connector.Error as e:
         st.error(f"차량 추천 쿼리 실패: {e}")
         return []
-
 
 # 추천 차량 세션
 def recommended_cars():
@@ -206,7 +196,6 @@ def recommended_cars():
     except Exception as e:
         st.error(f"차량 추천 오류: {e}")
         return []
-
 
 # # 추천 차량 세션
 # def recommended_cars():
@@ -222,142 +211,6 @@ def recommended_cars():
 # 페이지 상태관리
 if "page" not in st.session_state:
     st.session_state.page = "home"
-
-
-# 첫 번째 페이지(찾으러 가기)
-if st.session_state.page == "home":
-    st.markdown("<h1>당신의 첫 차, 차근차근 함께 찾아요</h1>", unsafe_allow_html=True)
-    st.write("나에게 맞는 첫 차를 3분 만에 찾아드립니다.")
-
-    with st.container():
-        st.markdown('<div class="center-button">', unsafe_allow_html=True)
-        if st.button("찾으러 가기", key="start_button"):
-            st.session_state.page = "balance"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-## 2 페이지, 성규님 코드 삽입
-
-# 밸런스(옵션선택) 화면
-elif st.session_state.page == "balance":
-    if not st.session_state.background_cleared:
-        clear_background()
-        st.session_state.background_cleared = True
-
-    selected = option_menu(
-        menu_title=None,
-        options=["기본 정보", "예산 범위", "연료 타입", "바디타입", "선호도"],
-        icons=["info-circle", "cash-coin", "ev-station", "car-front-fill", "heart"],
-        orientation="horizontal",
-        default_index=0,
-        styles={
-            "container": {"padding": "0!important", "background-color": "#F8B94A"},
-            "icon": {"color": "#444", "font-size": "18px"},
-            "nav-link": {"font-size": "16px", "text-align": "center", "margin": "5px"},
-            "nav-link-selected": {"background-color": "#FFCC66"},
-        }
-    )
-
-    # 페이지 내용 업데이트
-    if selected == "기본 정보":
-        st.header("기본 정보")
-        st.session_state.age = st.number_input("나이(세)", 20, 40, st.session_state.age)
-        st.session_state.gender = st.radio("성별", ["남", "여"], horizontal=True, index=["남", "여"].index(
-            st.session_state.gender) if st.session_state.gender else 0)
-        st.session_state.purpose = st.selectbox("주 사용 용도", ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"],
-                                                index=["출퇴근", "여행/나들이", "업무용", "주말 드라이브"].index(
-                                                    st.session_state.purpose) if st.session_state.purpose else 0)
-
-    elif selected == "예산 범위":
-        st.markdown("### 차량 구매 예산")
-        col1, col2 = st.columns([1, 1.3])
-        with col1:
-            st.image("예산_아이콘.png", width=100)
-        with col2:
-            st.session_state.min_val, st.session_state.max_val = st.slider(
-                "구매 예산 범위 설정 (단위: 만 원)", 1000, 5000, (st.session_state.min_val, st.session_state.max_val), step=500
-            )
-
-    elif selected == "연료 타입":
-        st.header("연료 타입 선택")
-        st.session_state.fuel_type = st.radio(
-            "원하는 연료 타입을 선택하세요",
-            ["디젤", "가솔린", "하이브리드", "전기"],
-            horizontal=True,
-            index=["디젤", "가솔린", "하이브리드", "전기"].index(
-                st.session_state.fuel_type) if st.session_state.fuel_type else 0
-        )
-
-    elif selected == "바디타입":
-        st.header("바디타입 선택")
-        st.session_state.body_type = st.radio(
-            "선호하는 바디타입을 선택하세요",
-            ["경차", "승용차", "SUV", "기타"],
-            horizontal=True,
-            index=["경차", "승용차", "SUV", "기타"].index(st.session_state.body_type) if st.session_state.body_type else 0
-        )
-
-    elif selected == "선호도":
-        st.header("선호도 선택")
-        st.markdown("### 중요하게 생각하는 항목을 순서대로 3개 선택해주세요!")
-        preference_options = [
-            "연비 (최저)",
-            "가격 (최저)",
-            "평점 (네이버 평점 기준)",
-            "차체 크기 (실내 공간 기준 = 축거/전장*100)",
-            "성능 (출력-최저)"
-        ]
-        # 1순위 선택
-        first_priority = st.selectbox(
-            "🏆 1순위",
-            options=preference_options,
-            key="first"
-        )
-
-        # 2순위 선택
-        second_priority = st.selectbox(
-            "🥈 2순위",
-            options=[opt for opt in preference_options if opt != st.session_state.first],
-            key="second"
-        )
-
-        # 3순위 선택
-        third_priority = st.selectbox(
-            "🥉 3순위",
-            options=[opt for opt in preference_options if opt not in (st.session_state.first, st.session_state.second)],
-            key="third"
-        )
-
-        # 선택 결과 출력
-        st.write("#### 🔎 선택한 중요도 순위")
-        st.write(f"1순위: **{st.session_state.first}**")
-        st.write(f"2순위: **{st.session_state.second}**")
-        st.write(f"3순위: **{st.session_state.third}**")
-
-    # 모든 항목 완료 체크 및 다음 단계 버튼
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 👉 모든 입력을 마치셨나요?")
-    required_fields = [
-        st.session_state.age,
-        st.session_state.gender,
-        st.session_state.purpose,
-        st.session_state.min_val,
-        st.session_state.max_val,
-        st.session_state.fuel_type,
-        st.session_state.body_type,
-        st.session_state.first,
-        st.session_state.second,
-        st.session_state.third
-    ]
-
-    if st.sidebar.button("다음 페이지로 이동"):
-        if all(required_fields):
-            st.sidebar.success("✅ 다음 페이지로 이동합니다!")
-            recommended_cars()
-            st.session_state.page = "recommendation"
-            st.rerun()
-        else:
-            st.sidebar.error("⚠️ 모든 값을 입력 후 버튼을 눌러주세요.")
-
 
 # 추천 결과 페이지
 elif st.session_state.page == "recommendation":
@@ -429,8 +282,3 @@ elif st.session_state.page == "recommendation":
         if st.button("다시 설정하기"):
             st.session_state.page = "balance"
             st.rerun()
-
-
-
-
-
