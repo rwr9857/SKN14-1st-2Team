@@ -9,14 +9,10 @@ from bs4 import BeautifulSoup as bs
 import re
 import time
 from WebScraping.car_info.car_info_dto import CarInfo
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 
 class CarInfoDAO:
     def __init__(self):
-        # self.driver = webdriver.Chrome()
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service)
+        self.driver = webdriver.Chrome()
         self.car_info_list = []
         self.url_list = []
 
@@ -49,7 +45,7 @@ class CarInfoDAO:
     def collect_urls(self):
         for page in range(1, 16):
             try:
-                container = self.driver.find_element(By.XPATH, f'//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[3]/div[{page}]')
+                container = self.driver.find_element(By.XPATH, f'//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[3]/div[' + str(page) + ']')
                 car_list = container.find_elements(By.CSS_SELECTOR, ".info_box")
 
                 for car_tag in car_list:
