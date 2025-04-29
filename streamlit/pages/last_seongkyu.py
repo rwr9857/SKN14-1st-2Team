@@ -1116,13 +1116,11 @@ if st.session_state.page == "통계 정보":
                 ).properties(width=300, height=300)
                 st.altair_chart(chart, use_container_width=True)
 
-        import altair as alt
-        import pandas as pd
+
 
         st.subheader("📊 직업별 선호 차량")
 
         # --- 데이터 준비 ---
-        # stats_df는 추천 데이터 (user + 추천 차량 데이터 조인한 것)
         jobs_order = ['대학생', '사무직', 'IT/개발', '서비스직', '생산직', '기타']
 
         job_car = (
@@ -1131,66 +1129,68 @@ if st.session_state.page == "통계 정보":
             .reset_index(name='count')
         )
 
-        # 직업별 추천수 상위 3개만 가져오기
         top3_job_car = (
             job_car.sort_values(['job_name', 'count'], ascending=[True, False])
             .groupby('job_name')
             .head(3)
         )
 
-        # offset 추가 (직업별 간격 벌리기)
-        offset_map = {}
-        offset_counter = 0
-        offset_list = []
+        # 직업명 순서 고정
+        top3_job_car['job_name'] = pd.Categorical(top3_job_car['job_name'], categories=jobs_order, ordered=True)
+        top3_job_car = top3_job_car.sort_values(['job_name'])
 
+        # offset 생성
+        offset_list = []
+        offset_counter = 0
         for job in jobs_order:
-            subset = top3_job_car[top3_job_car['job_name'] == job]
-            for _ in subset.iterrows():
-                offset_list.append(offset_counter)
-            offset_counter += 4  # 3개 + 띄우기
+            count = top3_job_car[top3_job_car['job_name'] == job].shape[0]
+            offset_list.extend([offset_counter + i for i in range(count)])
+            offset_counter += count + 4  # 간격
 
         top3_job_car['offset'] = offset_list
 
-        # --- Altair 그래프 생성 ---
+        # 📌 직업명 레이블용 데이터 (job_name마다 첫 offset)
+        job_labels = top3_job_car.groupby('job_name').first().reset_index()[['job_name', 'offset']]
 
-        # 1. 막대 그래프
-        bars = alt.Chart(top3_job_car).mark_bar(size=25).encode(
+        # --- Altair 시각화 ---
+
+        # 좌측 직업명 텍스트만 따로 그리기 (좌측 그래프 역할)
+        labels_chart = alt.Chart(job_labels).mark_text(
+            align='right',
+            baseline='middle',
+            dx=-5,
+            fontSize=13,
+            fontWeight='bold'
+        ).encode(
+            y=alt.Y('offset:O', axis=None),
+            text='job_name:N'
+        ).properties(width=100)
+
+        # 막대 그래프
+        bars = alt.Chart(top3_job_car).mark_bar(size=16).encode(
             y=alt.Y('offset:O', axis=None),
             x=alt.X('count:Q', title='추천 수'),
             color=alt.Color('car_full_name:N', legend=None),
-            tooltip=[alt.Tooltip('job_name:N', title='직업명'), alt.Tooltip('car_full_name:N', title='차량명'), 'count']
-        )
+            tooltip=[
+                alt.Tooltip('job_name:N', title='직업'),
+                alt.Tooltip('car_full_name:N', title='차량'),
+                alt.Tooltip('count:Q', title='추천 수')
+            ]
+        ).properties(width=600)
 
-        # 2. 왼쪽에 직업명 표시
-        text_job = alt.Chart(top3_job_car).mark_text(
-            align='right',
-            baseline='middle',
-            dx=-10,
-            fontSize=14,
-            fontWeight='bold'
-        ).encode(
-            y='offset:O',
-            text=alt.Text('job_name:N')
-        )
-
-        # 3. 막대 끝에 차량명 표시
+        # 차량명 오른쪽 출력
         text_car = alt.Chart(top3_job_car).mark_text(
             align='left',
             baseline='middle',
             dx=5,
-            fontSize=12
+            fontSize=11
         ).encode(
             y='offset:O',
             x='count:Q',
-            text=alt.Text('car_full_name:N')
+            text='car_full_name:N'
         )
 
-        # 4. 합치기
-        chart = (bars + text_job + text_car).properties(
-            width=800,
-            height=700
-        )
+        # 👉 전체 합치기 (직업명 그래프 + 막대 그래프)
+        full_chart = alt.hconcat(labels_chart, bars + text_car).resolve_scale(y='shared')
 
-        st.altair_chart(chart, use_container_width=True)
-
-
+        st.altair_chart(full_chart, use_container_width=True)
