@@ -1,5 +1,4 @@
-import mysql.connector
-from DB.dto.comment_info_dto import CommentDTO
+from DTO.comment_info_dto import CommentDTO
 
 
 class CommentDAO:

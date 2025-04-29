@@ -7,16 +7,20 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 import time
-from bs4 import BeautifulSoup as bs
-
-from WebScraping.mysql_connector import db_connection
-from DB.dto.car_review_dto import CarReviewDTO
-from DB.dto.comment_info_dto import CommentDTO
-from DB.dao.car_review_dao import CarReviewDAO
-from DB.dao.comment_info_dao import CommentDAO
+from DTO.car_review_dto import CarReviewDTO
+from DTO.comment_info_dto import CommentDTO
+from DAO.car_review_dao import CarReviewDAO
+from DAO.comment_info_dao import CommentDAO
 
 from datetime import datetime, timedelta
 import re
+
+import mysql.connector
+
+# DB 연결
+db_connection = mysql.connector.connect(
+    host="localhost", user="root", password="mysql", database="teamdb"
+)
 
 
 # 설문 조사 사람들 숫자만 가져오기
