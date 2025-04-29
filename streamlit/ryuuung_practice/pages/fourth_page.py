@@ -3,10 +3,23 @@ import mysql.connector
 import os
 from dotenv import load_dotenv
 import pandas as pd
-import altair as alt
+import plotly.graph_objects as go
 
 # 환경변수 로드
 load_dotenv()
+
+def get_star_rating(score):
+    """
+    10점 만점을 5개의 별로 변환
+    ★ : 채워진 별
+    ☆ : 빈 별
+    """
+    max_stars = 5
+    stars_score = (score / 10) * 5  # 10점 만점을 5점 만점으로 변환
+    full_stars = int(stars_score)  # 온전한 별의 개수
+    empty_stars = max_stars - full_stars  # 빈 별의 개수
+    
+    return "★" * full_stars + "☆" * empty_stars
 
 # DB 연결 함수
 def team_db():
@@ -83,6 +96,173 @@ def set_custom_styles():
             color: #888;
             font-size: 1em;
             border-top: 1px solid #eee;
+        }
+        .car-title {
+            color: #02584B;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #F6C248;
+        }
+        .review-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .review-metric {
+            font-size: 18px;
+            font-weight: bold;
+            color: #F6C248;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .star-rating {
+            color: #F6C248;
+            font-size: 20px;
+            letter-spacing: 2px;
+        }
+        .star-empty {
+            color: #ddd;
+        }
+        .participant-count {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .graph-container {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .review-button {
+            margin-top: 10px;
+        }
+        .review-button button {
+            background-color: #F6C248 !important;
+            color: white !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            border: none !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+            font-size: 14px !important;
+        }
+        .review-button button:hover {
+            background-color: #e5b43c !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+        .comment-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        .comment-card {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #F6C248;
+        }
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        .comment-content {
+            color: #333;
+            line-height: 1.5;
+        }
+        .graph-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #02584B;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .rating-box {
+            background-color: white;
+            padding: 10px;
+            padding-left: 40px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+        .average-score {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .participant-count {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .rating-description {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+            text-align: center;
+        }
+        .star-rating {
+            color: #F6C248;
+            font-size: 24px;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+        .car-image-container {
+            width: 100%;
+            max-height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .car-image-container img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+        .image-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .review-button {
+            margin-top: 0 !important;
+        }
+        .review-button button {
+            background-color: #F6C248 !important;
+            color: white !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            border: none !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+            font-size: 14px !important;
+            width: 100% !important;
+        }
+        .review-button button:hover {
+            background-color: #e5b43c !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -179,14 +359,27 @@ def get_comments_by_car(car_name):
     try:
         cur = conn.cursor(dictionary=True)
         query = """
-        SELECT
+        SELECT DISTINCT
             ci.nickname,
             ci.comment_avg_score,
             ci.comment_text,
             ci.created_at
-        FROM teamdb.comment_info ci
+        FROM (
+            SELECT 
+                nickname,
+                comment_avg_score,
+                comment_text,
+                created_at,
+                review_id,
+                ROW_NUMBER() OVER (
+                    PARTITION BY nickname, comment_text
+                    ORDER BY created_at DESC
+                ) as rn
+            FROM teamdb.comment_info
+        ) ci
         JOIN teamdb.car_review_info cri ON cri.review_id = ci.review_id
-        WHERE cri.car_name = %s
+        WHERE cri.car_name = %s AND ci.rn = 1
+        ORDER BY ci.created_at DESC
         """
         cur.execute(query, (car_name,))
         return cur.fetchall()
@@ -382,15 +575,20 @@ elif page == "리뷰와 평점":
         price_range = get_price_range(selected_price) if selected_price != "전체" else None
 
         query = """
-        SELECT 
+        SELECT DISTINCT
             cri.car_name,
             cri.avg_score,
             cri.survey_people_count,
             cri.graph_info,
             bi.brand_name,
-            bti.body_type_category
+            bti.body_type_category,
+            ci.car_price
         FROM teamdb.car_review_info cri
-        JOIN teamdb.car_info ci ON cri.car_name = ci.car_full_name
+        JOIN (
+            SELECT car_full_name, car_brand, car_body_type, car_price
+            FROM teamdb.car_info
+            GROUP BY car_full_name, car_brand, car_body_type, car_price
+        ) ci ON cri.car_name = ci.car_full_name
         JOIN teamdb.brand_info bi ON ci.car_brand = bi.brand_id
         JOIN teamdb.body_type_info bti ON ci.car_body_type = bti.body_name
         WHERE 1=1
@@ -448,72 +646,202 @@ elif page == "리뷰와 평점":
     if unique_reviews:
         for i, review in enumerate(current_reviews):
             car_name = review['car_name']
-            st.markdown(f"### {car_name} ({review['brand_name']})")
-            st.metric("평균 평점", f"{review['avg_score']:.1f} ⭐️")
-            st.write(f"설문 참여 인원: {review['survey_people_count']}명")
-
-            # 그래프 데이터 파싱
-            graph_labels = []
-            graph_scores = []
-            for line in review['graph_info'].split(','):
-                parts = line.strip().split('\n')
-                if len(parts) == 2:
-                    key = parts[0].strip()
-                    value = parts[1].strip()
+            
+            # 차량 제목
+            st.markdown(f'<div class="car-title">{car_name} ({review["brand_name"]})</div>', unsafe_allow_html=True)
+            
+            # 리뷰 통계와 그래프
+            col1, col2, col3 = st.columns([1, 1, 1.5])
+            
+            # 자동차 이미지 (왼쪽)
+            with col1:
+                # 자동차 이미지 URL 가져오기
+                conn = team_db()
+                car_img_url = None
+                if conn:
                     try:
-                        graph_labels.append(key)
-                        graph_scores.append(float(value))
-                    except ValueError:
-                        continue
+                        cur = conn.cursor(dictionary=True)
+                        cur.execute("SELECT car_img_url FROM teamdb.CAR_INFO WHERE car_full_name = %s LIMIT 1", (car_name,))
+                        result = cur.fetchone()
+                        if result:
+                            car_img_url = result['car_img_url']
+                    finally:
+                        conn.close()
 
-            # 그래프 표시
-            if graph_labels and graph_scores:
-                df = pd.DataFrame({
-                    '항목': graph_labels,
-                    '점수': graph_scores
-                })
-                chart = alt.Chart(df).mark_bar().encode(
-                    x=alt.X('항목', axis=alt.Axis(labelAngle=0)),
-                    y='점수'
-                ).properties(width=200, height=250)
-                st.altair_chart(chart, use_container_width=True)
+                st.markdown('''
+                    <style>
+                    .car-image-container {
+                        width: 100%;
+                        max-height: 250px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        overflow: hidden;
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                    }
+                    .car-image-container img {
+                        width: 100%;
+                        height: auto;
+                        object-fit: contain;
+                        vertical-align: middle;
+                    }
+                    .image-wrapper {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: flex-start;
+                        background-color: white;
+                        border-radius: 8px;
+                        padding: 20px;
+                        margin-top: 20px;
+                    }
+                    div[data-testid="stButton"] {
+                        width: 100%;
+                        margin-top: 0 !important;
+                    }
+                    div[data-testid="stButton"] button {
+                        background-color: #F6C248 !important;
+                        color: white !important;
+                        padding: 8px 16px !important;
+                        border-radius: 8px !important;
+                        border: none !important;
+                        font-weight: bold !important;
+                        transition: all 0.3s ease !important;
+                        font-size: 14px !important;
+                        width: 100% !important;
+                    }
+                    div[data-testid="stButton"] button:hover {
+                        background-color: #e5b43c !important;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                    }
+                    </style>
+                ''', unsafe_allow_html=True)
 
-            # 리뷰 펼치기 버튼
-            if f"show_reviews_{car_name}" not in st.session_state:
-                st.session_state[f"show_reviews_{car_name}"] = False
+                # 이미지와 버튼을 포함하는 컨테이너
+                with st.container():
+                    if car_img_url and car_img_url.strip().startswith("http"):
+                        st.markdown(f'''
+                            <div class="image-wrapper">
+                                <div class="car-image-container">
+                                    <img src="{car_img_url.strip()}" alt="{car_name}">
+                                </div>
+                            </div>
+                        ''', unsafe_allow_html=True)
+                    else:
+                        st.markdown(f'''
+                            <div class="image-wrapper">
+                                <div class="car-image-container">
+                                    <img src="../../docs/대체이미지.png" alt="대체 이미지">
+                                </div>
+                            </div>
+                        ''', unsafe_allow_html=True)
+                    
+                    # 리뷰 버튼
+                    if st.button("댓글 확인하러가기", key=f"review_btn_{i}"):
+                        st.session_state[f"show_reviews_{car_name}"] = not st.session_state.get(f"show_reviews_{car_name}", False)
+                        st.rerun()
+            
+            # 평점 정보 (중앙)
+            with col2:
+                avg_score = review["avg_score"]
+                stars = get_star_rating(avg_score)
+                st.markdown(f'''
+                    <div class="rating-box">
+                        <div class="average-score">{avg_score:.1f}</div>
+                        <div class="participant-count">{review["survey_people_count"]}명 참여</div>
+                        <div class="rating-description">
+                            이 모델을 소유한<br>
+                            오너들이 마이카에 등록한<br>
+                            본인차의 평가점수입니다
+                        </div>
+                        <div class="star-rating">{stars}</div>
+                    </div>
+                ''', unsafe_allow_html=True)
+            
+            # 그래프 (오른쪽)
+            with col3:
+                graph_labels = []
+                graph_scores = []
+                for line in review['graph_info'].split(','):
+                    parts = line.strip().split('\n')
+                    if len(parts) == 2:
+                        key = parts[0].strip()
+                        value = parts[1].strip()
+                        try:
+                            graph_labels.append(key)
+                            graph_scores.append(float(value))
+                        except ValueError:
+                            continue
 
-            if st.button(f"{car_name} 리뷰 전체 보기", key=f"review_btn_{i}"):
-                st.session_state[f"show_reviews_{car_name}"] = not st.session_state[f"show_reviews_{car_name}"]
-                st.rerun()
+                if graph_labels and graph_scores:
+                    # 레이더 차트를 위해 첫번째 값을 마지막에 한번 더 추가 (차트를 닫기 위해)
+                    graph_labels.append(graph_labels[0])
+                    graph_scores.append(graph_scores[0])
+                    
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatterpolar(
+                        r=graph_scores,
+                        theta=graph_labels,
+                        fill='toself',
+                        fillcolor='rgba(246, 194, 72, 0.3)',
+                        line=dict(color='#F6C248', width=2),
+                        hovertemplate='%{theta}: %{r:.1f}점<extra></extra>'
+                    ))
 
-            # 상세 리뷰 표시
-            if st.session_state[f"show_reviews_{car_name}"]:
-                unique_reviews = []
-                seen = set()
+                    fig.update_layout(
+                        polar=dict(
+                            radialaxis=dict(
+                                visible=True,
+                                range=[0, 10],
+                                showline=False,
+                                gridcolor='#f0f0f0',
+                                tickformat='.1f'
+                            ),
+                            angularaxis=dict(
+                                gridcolor='#f0f0f0'
+                            ),
+                            bgcolor='white'
+                        ),
+                        title={
+                            'text': '상세 평가',
+                            'y': 0.95,
+                            'x': 0.5,
+                            'xanchor': 'center',
+                            'yanchor': 'top',
+                            'font': {'size': 16, 'color': '#02584B'}
+                        },
+                        showlegend=False,
+                        margin=dict(l=20, r=20, t=40, b=20),
+                        height=250,
+                        width=300
+                    )
 
-                for r in reviews:
-                    if r['car_name'] == car_name:
-                        key = (r['car_name'], r.get('graph_info', ''))  # (차 이름, 그래프 정보) 기준 중복 제거
-                        if key not in seen:
-                            unique_reviews.append(r)
-                            seen.add(key)
+                    st.plotly_chart(fig, use_container_width=False, config={'displayModeBar': False})
 
-                for idx, r in enumerate(unique_reviews, 1):
-                    st.markdown(f"**[리뷰 {idx}]** 평균 평점: {r['avg_score']} / 참여: {r['survey_people_count']}명")
-                    st.write(r.get('graph_info', ''))
-                    st.markdown("---")
-
-                # 댓글 표시
+            # 댓글 섹션
+            if st.session_state.get(f"show_reviews_{car_name}", False):
+                st.markdown('<div class="comment-section">', unsafe_allow_html=True)
                 comments = get_comments_by_car(car_name)
                 if comments:
-                    st.markdown("#### 댓글")
+                    st.markdown("#### 사용자 댓글")
                     for comment in comments:
-                        st.markdown(
-                            f"**{comment['nickname']}** ({comment['comment_avg_score']}⭐️) - {comment['created_at']}")
-                        st.write(comment['comment_text'])
-                        st.markdown("---")
+                        st.markdown(f'''
+                            <div class="comment-card">
+                                <div class="comment-header">
+                                    <span><strong>{comment['nickname']}</strong> ({comment['comment_avg_score']}⭐️)</span>
+                                    <span>{comment['created_at']}</span>
+                                </div>
+                                <div class="comment-content">
+                                    {comment['comment_text']}
+                                </div>
+                            </div>
+                        ''', unsafe_allow_html=True)
                 else:
-                    st.write("댓글이 없습니다.")
+                    st.info("아직 댓글이 없습니다.")
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.markdown("---")
     else:
         st.info("조건에 맞는 리뷰 정보가 없습니다.")
 
