@@ -488,8 +488,17 @@ elif page == "리뷰와 평점":
 
             # 상세 리뷰 표시
             if st.session_state[f"show_reviews_{car_name}"]:
-                all_reviews = [r for r in reviews if r['car_name'] == car_name]
-                for idx, r in enumerate(all_reviews, 1):
+                unique_reviews = []
+                seen = set()
+
+                for r in reviews:
+                    if r['car_name'] == car_name:
+                        key = (r['car_name'], r.get('graph_info', ''))  # (차 이름, 그래프 정보) 기준 중복 제거
+                        if key not in seen:
+                            unique_reviews.append(r)
+                            seen.add(key)
+
+                for idx, r in enumerate(unique_reviews, 1):
                     st.markdown(f"**[리뷰 {idx}]** 평균 평점: {r['avg_score']} / 참여: {r['survey_people_count']}명")
                     st.write(r.get('graph_info', ''))
                     st.markdown("---")
