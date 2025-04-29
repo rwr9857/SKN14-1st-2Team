@@ -11,6 +11,7 @@ load_dotenv()
 LOGO_PATH = "./resource/차근차근 로고.png"
 BUDGET_ICON_PATH = "./resource/예산_아이콘.png"
 
+
 # DB 연결 함수
 def team_db():
     try:

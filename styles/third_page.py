@@ -1,5 +1,4 @@
-# 스타일 설정
-from turtle import st
+import streamlit as st
 
 
 def set_custom_styles():

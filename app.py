@@ -11,9 +11,6 @@ st.set_page_config(
 
 BACKGROUND_PATH = "./resource/background.png"
 LOGO_PATH = "./resource/차근차근 로고.png"
-BUDGET_ICON_PATH = "./resource/예산_아이콘.png"
-# 4페이지 에서 사용하나 리소스 없음.
-OTHER_IMG_PATH = "./resource/대체이미지.png"
 
 # 이미지 불러오기
 bg_b64 = get_base64_image(BACKGROUND_PATH)
