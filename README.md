@@ -6,48 +6,49 @@
 
 ## 👥 팀원 소개
 
-<table border="1" style="border-collapse: collapse; text-align: center;">
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
   <thead>
     <tr>
-      <th style="padding: 10px;">캐릭터</th>
-      <th style="padding: 10px;">이름</th>
-      <th style="padding: 10px;">역할</th>
-      <th style="padding: 10px;">담당 업무</th>
+      <th style="padding: 10px; width: 120px;">캐릭터</th>
+      <th style="padding: 10px; width: 100px;">이름</th>
+      <th style="padding: 10px; width: 160px;">역할</th>
+      <th style="padding: 10px; width: 320px;">담당 업무</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td><img src="./docs/image2.png" width="200" style="display: block; margin: auto;"></td>
-      <td>김의령</td>
+      <td>김00</td>
       <td>프론트엔드, 백엔드</td>
-      <td>리뷰데이터 수집 및 DB 생성, 피그마 페이지 설계 및 streamlit 세부 UI 수정</td>
+      <td>리뷰데이터 수집 및 DB 생성,<br>피그마 페이지 설계 및 Streamlit 세부 UI 수정</td>
     </tr>
     <tr>
       <td><img src="./docs/image4.png" width="200" style="display: block; margin: auto;"></td>
-      <td>김준기</td>
+      <td>김00</td>
       <td>프론트엔드, 백엔드</td>
       <td>발표 및 팀원들 오류 해결</td>
     </tr>
     <tr>
       <td><img src="./docs/image1.png" width="200" style="display: block; margin: auto;"></td>
-      <td>윤이서</td>
+      <td>윤00</td>
       <td>백엔드</td>
-      <td>데이터 스크래핑 및 자동차정보 DB 생성</td>
+      <td>데이터 스크래핑 및<br>자동차정보 DB 생성</td>
     </tr>
     <tr>
       <td><img src="./docs/image5.png" width="200" style="display: block; margin: auto;"></td>
-      <td>조성렬</td>
+      <td>조00</td>
       <td>프론트엔드</td>
-      <td>streamlit 구현 및 README 작성</td>
+      <td>Streamlit 구현 및<br>README 작성</td>
     </tr>
     <tr>
       <td><img src="./docs/image3.png" width="200" style="display: block; margin: auto;"></td>
-      <td>한성규</td>
+      <td>한00</td>
       <td>프론트엔드</td>
-      <td>streamlit 구현</td>
+      <td>Streamlit 구현</td>
     </tr>
   </tbody>
 </table>
+
 
 ---
 
