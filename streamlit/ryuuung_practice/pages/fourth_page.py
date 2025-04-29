@@ -103,6 +103,7 @@ def set_custom_styles():
             font-weight: bold;
             margin-bottom: 15px;
             padding-bottom: 10px;
+            padding-top: 20px;
             border-bottom: 2px solid #F6C248;
         }
         .review-stats {
@@ -161,7 +162,7 @@ def set_custom_styles():
         .comment-section {
             margin-top: 20px;
             padding: 20px;
-            background-color: #f8f9fa;
+       
             border-radius: 10px;
         }
         .comment-card {
@@ -235,6 +236,9 @@ def set_custom_styles():
             height: auto;
             object-fit: contain;
             vertical-align: middle;
+        }
+        .st-emotion-cache-16tyu1 h2 {
+            font-size: 1.5rem;
         }
         .image-wrapper {
             display: flex;
