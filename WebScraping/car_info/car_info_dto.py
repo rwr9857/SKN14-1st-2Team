@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class CarInfo:
     id: int
@@ -14,4 +15,3 @@ class CarInfo:
     engine_type: str
     image_link: str
     brand: str
-

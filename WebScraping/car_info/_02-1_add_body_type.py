@@ -1,25 +1,26 @@
 import mysql.connector
 
+
 def add_body_type_category():
     """tbl_body_type 테이블에 body_type_category 칼럼 추가 및 PRIMARY KEY 설정하는 함수"""
 
     # MySQL 데이터베이스 연결
     conn = mysql.connector.connect(
-        host='localhost',
-        user='skn14',
-        password='skn14',
-        database='teamdb'
+        host="localhost", user="skn14", password="skn14", database="teamdb"
     )
     cursor = conn.cursor()
 
     # body_type_category 칼럼 추가
-    cursor.execute('''
+    cursor.execute(
+        """
         ALTER TABLE tbl_body_type
         ADD COLUMN body_type_category VARCHAR(255);
-    ''')
+    """
+    )
 
     # body_type_category 칼럼 업데이트 (여기에 body_type별로 값을 설정)
-    cursor.execute('''
+    cursor.execute(
+        """
         UPDATE tbl_body_type
         SET body_type_category = CASE 
             WHEN body_type = '준대형 세단' THEN '승용차'
@@ -51,7 +52,8 @@ def add_body_type_category():
             WHEN body_type = '준중형 트럭' THEN '기타'
             ELSE body_type_category -- 매칭 안된건 기존 값 유지
         END;
-    ''')
+    """
+    )
 
     # 변경 사항 저장
     conn.commit()
@@ -60,7 +62,10 @@ def add_body_type_category():
     cursor.close()
     conn.close()
 
-    print("✅ tbl_body_type 테이블의 body_type_category 칼럼이 추가되었고, PRIMARY KEY로 설정되었습니다.")
+    print(
+        "✅ tbl_body_type 테이블의 body_type_category 칼럼이 추가되었고, PRIMARY KEY로 설정되었습니다."
+    )
+
 
 if __name__ == "__main__":
     add_body_type_category()

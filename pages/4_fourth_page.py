@@ -9,6 +9,7 @@ import altair as alt
 # 환경변수 로드
 load_dotenv()
 
+
 def get_star_rating(score):
     """
     10점 만점을 5개의 별로 변환
@@ -19,8 +20,9 @@ def get_star_rating(score):
     stars_score = (score / 10) * 5  # 10점 만점을 5점 만점으로 변환
     full_stars = int(stars_score)  # 온전한 별의 개수
     empty_stars = max_stars - full_stars  # 빈 별의 개수
-    
+
     return "★" * full_stars + "☆" * empty_stars
+
 
 # DB 연결 함수
 def team_db():
@@ -30,16 +32,18 @@ def team_db():
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             database=os.getenv("DB_NAME"),
-            charset=os.getenv("DB_CHARSET", "utf8mb4")
+            charset=os.getenv("DB_CHARSET", "utf8mb4"),
         )
         return conn
     except mysql.connector.Error as e:
         st.error(f"DB 연결 실패: {e}")
         return None
 
+
 # 스타일 설정
 def set_custom_styles():
-    st.markdown("""
+    st.markdown(
+        """
         <style>
         .stApp {
             background-color: white;
@@ -497,7 +501,10 @@ def set_custom_styles():
             margin-top: 15px;
         }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 # 고유값 조회 함수
 def get_distinct_values(query):
@@ -511,6 +518,7 @@ def get_distinct_values(query):
     finally:
         conn.close()
 
+
 # 가격 범위 변환 함수
 def get_price_range(selected):
     if selected == "1000만원대":
@@ -523,6 +531,7 @@ def get_price_range(selected):
         return (4000, 1_000_000)
     return None
 
+
 # 연비 범위 변환 함수
 def get_min_efficiency(selected):
     if selected == "10이하":
@@ -533,8 +542,16 @@ def get_min_efficiency(selected):
         return 15
     return None
 
+
 # 차량 검색 쿼리 생성 함수
-def make_query(price_range=None, min_efficiency=None, body_type=None, fuel_type=None, limit=8, offset=0):
+def make_query(
+    price_range=None,
+    min_efficiency=None,
+    body_type=None,
+    fuel_type=None,
+    limit=8,
+    offset=0,
+):
     query = """
     SELECT
         ci.car_full_name,
@@ -561,6 +578,7 @@ def make_query(price_range=None, min_efficiency=None, body_type=None, fuel_type=
     query += f" ORDER BY ci.car_price LIMIT {limit} OFFSET {offset}"
     return query
 
+
 # 리뷰 요약 가져오기
 def get_review_summary():
     conn = team_db()
@@ -582,6 +600,7 @@ def get_review_summary():
     finally:
         if conn:
             conn.close()
+
 
 # 차량별 댓글 가져오기
 def get_comments_by_car(car_name):
@@ -622,12 +641,13 @@ def get_comments_by_car(car_name):
         if conn:
             conn.close()
 
+
 # 페이지 설정
 st.set_page_config(page_title="차근차근 - 차량 정보", layout="wide")
 set_custom_styles()
 
 # 로고 표시
-st.image("../../docs/차근차근 로고.png", width=180)
+st.image("./resource/차근차근 로고.png", width=180)
 
 # 사이드바 메뉴
 st.sidebar.title("메뉴")
@@ -647,7 +667,9 @@ if page == "차량 정보 조회":
     with col1:
         selected_body = st.selectbox("외형", body_types)
     with col2:
-        selected_price = st.selectbox("가격", ["전체", "1000만원대", "2000만원대", "3000만원대", "4000만원 이상"])
+        selected_price = st.selectbox(
+            "가격", ["전체", "1000만원대", "2000만원대", "3000만원대", "4000만원 이상"]
+        )
     with col3:
         selected_eff = st.selectbox("연비", ["전체", "10이하", "10~15", "15이상"])
     with col4:
@@ -668,12 +690,16 @@ if page == "차량 정보 조회":
     offset = (st.session_state.pagenation - 1) * page_size
 
     query = make_query(
-        price_range=get_price_range(selected_price) if selected_price != "전체" else None,
-        min_efficiency=get_min_efficiency(selected_eff) if selected_eff != "전체" else None,
+        price_range=(
+            get_price_range(selected_price) if selected_price != "전체" else None
+        ),
+        min_efficiency=(
+            get_min_efficiency(selected_eff) if selected_eff != "전체" else None
+        ),
         body_type=selected_body if selected_body != "전체" else None,
         fuel_type=selected_fuel if selected_fuel != "전체" else None,
         limit=page_size,
-        offset=offset
+        offset=offset,
     )
 
     conn = team_db()
@@ -691,14 +717,16 @@ if page == "차량 정보 조회":
     # 차량 카드 표시
     if cars_from_db:
         for i in range(0, len(cars_from_db), 4):
-            card_row = cars_from_db[i:i + 4]
+            card_row = cars_from_db[i : i + 4]
             cols = st.columns(4)
             for idx, car in enumerate(card_row):
                 with cols[idx]:
-                    if car['car_img_url'] and car['car_img_url'].strip().startswith("http"):
-                        st.image(car['car_img_url'].strip(), use_container_width=True)
+                    if car["car_img_url"] and car["car_img_url"].strip().startswith(
+                        "http"
+                    ):
+                        st.image(car["car_img_url"].strip(), use_container_width=True)
                     else:
-                        st.image("../../docs/대체이미지.png", use_container_width=True)
+                        st.image("./resource/대체이미지.png", use_container_width=True)
                     st.markdown(f"**{car['car_full_name']}**")
                     st.markdown(f"{car['car_price']}만원")
                     if st.button("세부정보", key=f"detail_{i}_{idx}"):
@@ -714,10 +742,10 @@ if page == "차량 정보 조회":
 
         col1, col2 = st.columns([1, 2])
         with col1:
-            if car['car_img_url'] and car['car_img_url'].strip().startswith("http"):
-                st.image(car['car_img_url'].strip(), width=300)
+            if car["car_img_url"] and car["car_img_url"].strip().startswith("http"):
+                st.image(car["car_img_url"].strip(), width=300)
             else:
-                st.image("../../docs/대체이미지.png", width=300)
+                st.image("./resource/대체이미지.png", width=300)
 
         with col2:
             st.markdown(f"### {car.get('brand_name', '')} {car['car_full_name']}")
@@ -728,12 +756,16 @@ if page == "차량 정보 조회":
 
     # 페이지네이션
     total_query = make_query(
-        price_range=get_price_range(selected_price) if selected_price != "전체" else None,
-        min_efficiency=get_min_efficiency(selected_eff) if selected_eff != "전체" else None,
+        price_range=(
+            get_price_range(selected_price) if selected_price != "전체" else None
+        ),
+        min_efficiency=(
+            get_min_efficiency(selected_eff) if selected_eff != "전체" else None
+        ),
         body_type=selected_body if selected_body != "전체" else None,
         fuel_type=selected_fuel if selected_fuel != "전체" else None,
         limit=1000000,
-        offset=0
+        offset=0,
     )
 
     total_query = total_query.split("ORDER BY")[0] + "ORDER BY 1"
@@ -789,22 +821,32 @@ elif page == "리뷰와 평점":
     with col1:
         selected_body = st.selectbox("외형", body_types, key="review_body_filter")
     with col2:
-        brand_names = ["전체"] + get_distinct_values("SELECT DISTINCT brand_name FROM teamdb.BRAND_INFO")
+        brand_names = ["전체"] + get_distinct_values(
+            "SELECT DISTINCT brand_name FROM teamdb.BRAND_INFO"
+        )
         selected_brand = st.selectbox("브랜드", brand_names, key="review_brand_filter")
     with col3:
-        price_ranges = ["전체", "1000만원대", "2000만원대", "3000만원대", "4000만원 이상"]
+        price_ranges = [
+            "전체",
+            "1000만원대",
+            "2000만원대",
+            "3000만원대",
+            "4000만원 이상",
+        ]
         selected_price = st.selectbox("가격", price_ranges, key="review_price_filter")
     with col4:
         sort_options = {
             "평점 높은 순": "cri.avg_score DESC",
             "평점 낮은 순": "cri.avg_score ASC",
-            "참여 인원 많은 순": "cri.survey_people_count DESC"
+            "참여 인원 많은 순": "cri.survey_people_count DESC",
         }
         selected_sort = st.selectbox("정렬 기준", list(sort_options.keys()))
 
     # 리뷰 필터링
     def get_filtered_reviews():
-        price_range = get_price_range(selected_price) if selected_price != "전체" else None
+        price_range = (
+            get_price_range(selected_price) if selected_price != "전체" else None
+        )
 
         query = """
         SELECT DISTINCT
@@ -853,7 +895,7 @@ elif page == "리뷰와 평점":
     # 차량명별 중복 제거
     unique_car_reviews = {}
     for review in reviews:
-        car_name = review['car_name']
+        car_name = review["car_name"]
         if car_name not in unique_car_reviews:
             unique_car_reviews[car_name] = review
     unique_reviews = list(unique_car_reviews.values())
@@ -868,7 +910,11 @@ elif page == "리뷰와 평점":
 
     review_page_size = 4
     total_reviews = len(unique_reviews)
-    total_review_pages = (total_reviews + review_page_size - 1) // review_page_size if total_reviews > 0 else 1
+    total_review_pages = (
+        (total_reviews + review_page_size - 1) // review_page_size
+        if total_reviews > 0
+        else 1
+    )
 
     start_idx = (st.session_state.review_pagenation - 1) * review_page_size
     end_idx = start_idx + review_page_size
@@ -877,14 +923,17 @@ elif page == "리뷰와 평점":
     # 리뷰 목록 표시
     if unique_reviews:
         for i, review in enumerate(current_reviews):
-            car_name = review['car_name']
-            
+            car_name = review["car_name"]
+
             # 차량 제목
-            st.markdown(f'<div class="car-title">{car_name} ({review["brand_name"]})</div>', unsafe_allow_html=True)
-            
+            st.markdown(
+                f'<div class="car-title">{car_name} ({review["brand_name"]})</div>',
+                unsafe_allow_html=True,
+            )
+
             # 리뷰 통계와 그래프
             col1, col2, col3 = st.columns([1, 1, 1.5])
-            
+
             # 자동차 이미지 (왼쪽)
             with col1:
                 # 자동차 이미지 URL 가져오기
@@ -893,14 +942,18 @@ elif page == "리뷰와 평점":
                 if conn:
                     try:
                         cur = conn.cursor(dictionary=True)
-                        cur.execute("SELECT car_img_url FROM teamdb.CAR_INFO WHERE car_full_name = %s LIMIT 1", (car_name,))
+                        cur.execute(
+                            "SELECT car_img_url FROM teamdb.CAR_INFO WHERE car_full_name = %s LIMIT 1",
+                            (car_name,),
+                        )
                         result = cur.fetchone()
                         if result:
-                            car_img_url = result['car_img_url']
+                            car_img_url = result["car_img_url"]
                     finally:
                         conn.close()
 
-                st.markdown('''
+                st.markdown(
+                    """
                     <style>
                     .car-image-container {
                         width: 100%;
@@ -948,37 +1001,48 @@ elif page == "리뷰와 평점":
                         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
                     }
                     </style>
-                ''', unsafe_allow_html=True)
+                """,
+                    unsafe_allow_html=True,
+                )
 
                 # 이미지와 버튼을 포함하는 컨테이너
                 with st.container():
                     if car_img_url and car_img_url.strip().startswith("http"):
-                        st.markdown(f'''
+                        st.markdown(
+                            f"""
                             <div class="image-wrapper">
                                 <div class="car-image-container">
                                     <img src="{car_img_url.strip()}" alt="{car_name}">
                                 </div>
                             </div>
-                        ''', unsafe_allow_html=True)
+                        """,
+                            unsafe_allow_html=True,
+                        )
                     else:
-                        st.markdown(f'''
+                        st.markdown(
+                            f"""
                             <div class="image-wrapper">
                                 <div class="car-image-container">
-                                    <img src="../../docs/대체이미지.png" alt="대체 이미지">
+                                    <img src="./resource/대체이미지.png" alt="대체 이미지">
                                 </div>
                             </div>
-                        ''', unsafe_allow_html=True)
-                    
+                        """,
+                            unsafe_allow_html=True,
+                        )
+
                     # 리뷰 버튼
                     if st.button("댓글 확인하러가기", key=f"review_btn_{i}"):
-                        st.session_state[f"show_reviews_{car_name}"] = not st.session_state.get(f"show_reviews_{car_name}", False)
+                        st.session_state[f"show_reviews_{car_name}"] = (
+                            not st.session_state.get(f"show_reviews_{car_name}", False)
+                        )
                         st.rerun()
-            
+
             # 평점 정보 (중앙)
             with col2:
                 avg_score = review["avg_score"]
                 stars = get_star_rating(avg_score)
-                st.markdown(f'''
+                st.markdown(
+                    f"""
                     <div class="rating-box">
                         <div class="average-score">{avg_score:.1f}</div>
                         <div class="participant-count">{review["survey_people_count"]}명 참여</div>
@@ -989,14 +1053,16 @@ elif page == "리뷰와 평점":
                         </div>
                         <div class="star-rating">{stars}</div>
                     </div>
-                ''', unsafe_allow_html=True)
-            
+                """,
+                    unsafe_allow_html=True,
+                )
+
             # 그래프 (오른쪽)
             with col3:
                 graph_labels = []
                 graph_scores = []
-                for line in review['graph_info'].split(','):
-                    parts = line.strip().split('\n')
+                for line in review["graph_info"].split(","):
+                    parts = line.strip().split("\n")
                     if len(parts) == 2:
                         key = parts[0].strip()
                         value = parts[1].strip()
@@ -1010,16 +1076,18 @@ elif page == "리뷰와 평점":
                     # 레이더 차트를 위해 첫번째 값을 마지막에 한번 더 추가 (차트를 닫기 위해)
                     graph_labels.append(graph_labels[0])
                     graph_scores.append(graph_scores[0])
-                    
+
                     fig = go.Figure()
-                    fig.add_trace(go.Scatterpolar(
-                        r=graph_scores,
-                        theta=graph_labels,
-                        fill='toself',
-                        fillcolor='rgba(246, 194, 72, 0.3)',
-                        line=dict(color='#F6C248', width=2),
-                        hovertemplate='%{theta}: %{r:.1f}점<extra></extra>'
-                    ))
+                    fig.add_trace(
+                        go.Scatterpolar(
+                            r=graph_scores,
+                            theta=graph_labels,
+                            fill="toself",
+                            fillcolor="rgba(246, 194, 72, 0.3)",
+                            line=dict(color="#F6C248", width=2),
+                            hovertemplate="%{theta}: %{r:.1f}점<extra></extra>",
+                        )
+                    )
 
                     fig.update_layout(
                         polar=dict(
@@ -1027,29 +1095,29 @@ elif page == "리뷰와 평점":
                                 visible=True,
                                 range=[0, 10],
                                 showline=False,
-                                gridcolor='#f0f0f0',
-                                tickformat='.1f'
+                                gridcolor="#f0f0f0",
+                                tickformat=".1f",
                             ),
-                            angularaxis=dict(
-                                gridcolor='#f0f0f0'
-                            ),
-                            bgcolor='white'
+                            angularaxis=dict(gridcolor="#f0f0f0"),
+                            bgcolor="white",
                         ),
                         title={
-                            'text': '상세 평가',
-                            'y': 0.95,
-                            'x': 0.5,
-                            'xanchor': 'center',
-                            'yanchor': 'top',
-                            'font': {'size': 16, 'color': '#02584B'}
+                            "text": "상세 평가",
+                            "y": 0.95,
+                            "x": 0.5,
+                            "xanchor": "center",
+                            "yanchor": "top",
+                            "font": {"size": 16, "color": "#02584B"},
                         },
                         showlegend=False,
                         margin=dict(l=20, r=20, t=40, b=20),
                         height=250,
-                        width=300
+                        width=300,
                     )
 
-                    st.plotly_chart(fig, use_container_width=False, config={'displayModeBar': False})
+                    st.plotly_chart(
+                        fig, use_container_width=False, config={"displayModeBar": False}
+                    )
 
             # 댓글 섹션
             if st.session_state.get(f"show_reviews_{car_name}", False):
@@ -1058,7 +1126,8 @@ elif page == "리뷰와 평점":
                 if comments:
                     st.markdown("#### 사용자 댓글")
                     for comment in comments:
-                        st.markdown(f'''
+                        st.markdown(
+                            f"""
                             <div class="comment-card">
                                 <div class="comment-header">
                                     <span><strong>{comment['nickname']}</strong> ({comment['comment_avg_score']}⭐️)</span>
@@ -1068,11 +1137,13 @@ elif page == "리뷰와 평점":
                                     {comment['comment_text']}
                                 </div>
                             </div>
-                        ''', unsafe_allow_html=True)
+                        """,
+                            unsafe_allow_html=True,
+                        )
                 else:
                     st.info("아직 댓글이 없습니다.")
-                st.markdown('</div>', unsafe_allow_html=True)
-            
+                st.markdown("</div>", unsafe_allow_html=True)
+
             st.markdown("---")
     else:
         st.info("조건에 맞는 리뷰 정보가 없습니다.")
@@ -1143,36 +1214,39 @@ elif page == "통계 정보":
     else:
         ### 연령별 통계
         st.subheader("📊 연령대별 선호 차량 분석")
-        
+
         # 연령대 그룹핑
-        stats_df['age_group'] = pd.cut(
-            stats_df['user_age'],
+        stats_df["age_group"] = pd.cut(
+            stats_df["user_age"],
             bins=[0, 29, 39, 49, 100],
-            labels=['20대', '30대', '40대', '50대 이상']
+            labels=["20대", "30대", "40대", "50대 이상"],
         )
 
         # 연령대별 데이터를 한 번에 처리
-        age_groups = ['20대', '30대', '40대']
-        
+        age_groups = ["20대", "30대", "40대"]
+
         # 3개의 열 생성
         cols = st.columns(3)
-        
+
         for idx, age in enumerate(age_groups):
             with cols[idx]:
-                age_data = stats_df[stats_df['age_group'] == age]
+                age_data = stats_df[stats_df["age_group"] == age]
                 if not age_data.empty:
-                    st.markdown(f'''
+                    st.markdown(
+                        f"""
                         <div class="age-stats-container">
                             <div class="age-group-title">{age}</div>
                             <div style="display: flex; flex-direction: column; gap: 15px;">
-                    ''', unsafe_allow_html=True)
-                    
+                    """,
+                        unsafe_allow_html=True,
+                    )
+
                     # 상위 3개 차량 추출
                     top_cars = (
-                        age_data.groupby('car_full_name')
+                        age_data.groupby("car_full_name")
                         .size()
-                        .reset_index(name='count')
-                        .sort_values('count', ascending=False)
+                        .reset_index(name="count")
+                        .sort_values("count", ascending=False)
                         .head(3)
                     )
 
@@ -1185,20 +1259,21 @@ elif page == "통계 정보":
                                 cur = conn.cursor(dictionary=True)
                                 cur.execute(
                                     "SELECT car_img_url FROM teamdb.CAR_INFO WHERE car_full_name = %s LIMIT 1",
-                                    (car['car_full_name'],)
+                                    (car["car_full_name"],),
                                 )
                                 result = cur.fetchone()
                                 if result:
-                                    car_img_url = result['car_img_url']
+                                    car_img_url = result["car_img_url"]
                             finally:
                                 conn.close()
 
-                        st.markdown(f'''
+                        st.markdown(
+                            f"""
                             <div class="car-card">
                                 <div class="car-rank-badge">
                                     {rank}위
                                 </div>
-                                <img src="{car_img_url.strip() if car_img_url and car_img_url.strip().startswith('http') else '../../docs/대체이미지.png'}" 
+                                <img src="{car_img_url.strip() if car_img_url and car_img_url.strip().startswith('http') else './resource/대체이미지.png'}" 
                                      class="car-image">
                                 <div class="car-title">
                                     {car['car_full_name']}
@@ -1207,135 +1282,162 @@ elif page == "통계 정보":
                                     추천 수: {car['count']}건
                                 </div>
                             </div>
-                        ''', unsafe_allow_html=True)
+                        """,
+                            unsafe_allow_html=True,
+                        )
 
-                    st.markdown('''
+                    st.markdown(
+                        """
                             </div>
                         </div>
-                    ''', unsafe_allow_html=True)
+                    """,
+                        unsafe_allow_html=True,
+                    )
 
         ### 성별별 통계
         st.subheader("📊 성별별 선호 차량")
 
         # 성별 데이터를 한 번에 처리하기 위한 컬럼 생성
         gender_cols = st.columns(2)
-        
-        genders = stats_df['user_gender'].dropna().unique()
+
+        genders = stats_df["user_gender"].dropna().unique()
         for idx, gender in enumerate(genders):
             with gender_cols[idx]:
-                gender_data = stats_df[stats_df['user_gender'] == gender]
+                gender_data = stats_df[stats_df["user_gender"] == gender]
                 if not gender_data.empty:
                     top_cars = (
-                        gender_data.groupby('car_full_name')
+                        gender_data.groupby("car_full_name")
                         .size()
-                        .reset_index(name='count')
-                        .sort_values('count', ascending=False)
+                        .reset_index(name="count")
+                        .sort_values("count", ascending=False)
                         .head(5)
                     )
 
                     st.markdown(f"#### {gender}")
-                    chart = alt.Chart(top_cars).mark_arc(innerRadius=50).encode(
-                        theta=alt.Theta('count:Q', title='추천 수'),
-                        color=alt.Color('car_full_name:N', title='차량명',
-                                      scale=alt.Scale(scheme='category20')),  # 색상 스키마 추가
-                        tooltip=['car_full_name:N', 'count:Q']
-                    ).properties(
-                        width=300,
-                        height=300,
-                        title=f"{gender} 선호 차량 TOP 5"
+                    chart = (
+                        alt.Chart(top_cars)
+                        .mark_arc(innerRadius=50)
+                        .encode(
+                            theta=alt.Theta("count:Q", title="추천 수"),
+                            color=alt.Color(
+                                "car_full_name:N",
+                                title="차량명",
+                                scale=alt.Scale(scheme="category20"),
+                            ),  # 색상 스키마 추가
+                            tooltip=["car_full_name:N", "count:Q"],
+                        )
+                        .properties(
+                            width=300, height=300, title=f"{gender} 선호 차량 TOP 5"
+                        )
                     )
                     st.altair_chart(chart, use_container_width=True)
 
                     # 상세 데이터 테이블 추가
-                    st.markdown("""
+                    st.markdown(
+                        """
                         <style>
                         .gender-stats-table {
                             font-size: 14px;
                             margin-top: 15px;
                         }
                         </style>
-                    """, unsafe_allow_html=True)
-                    
-                    st.markdown('<div class="gender-stats-table">', unsafe_allow_html=True)
+                    """,
+                        unsafe_allow_html=True,
+                    )
+
+                    st.markdown(
+                        '<div class="gender-stats-table">', unsafe_allow_html=True
+                    )
                     for idx, row in top_cars.iterrows():
-                        st.markdown(f"**{idx+1}위**: {row['car_full_name']} ({row['count']}건)")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(
+                            f"**{idx+1}위**: {row['car_full_name']} ({row['count']}건)"
+                        )
+                    st.markdown("</div>", unsafe_allow_html=True)
 
         ### 직업별 통계
         st.subheader("📊 직업별 선호 차량")
 
         # 데이터 준비
-        jobs_order = ['대학생', '사무직', 'IT/개발', '서비스직', '생산직', '기타']
+        jobs_order = ["대학생", "사무직", "IT/개발", "서비스직", "생산직", "기타"]
 
         job_car = (
-            stats_df.groupby(['job_name', 'car_full_name'])
+            stats_df.groupby(["job_name", "car_full_name"])
             .size()
-            .reset_index(name='count')
+            .reset_index(name="count")
         )
 
         top3_job_car = (
-            job_car.sort_values(['job_name', 'count'], ascending=[True, False])
-            .groupby('job_name')
+            job_car.sort_values(["job_name", "count"], ascending=[True, False])
+            .groupby("job_name")
             .head(3)
         )
 
         # 직업명 순서 고정
-        top3_job_car['job_name'] = pd.Categorical(top3_job_car['job_name'], categories=jobs_order, ordered=True)
-        top3_job_car = top3_job_car.sort_values(['job_name'])
+        top3_job_car["job_name"] = pd.Categorical(
+            top3_job_car["job_name"], categories=jobs_order, ordered=True
+        )
+        top3_job_car = top3_job_car.sort_values(["job_name"])
 
         # offset 생성
         offset_list = []
         offset_counter = 0
         for job in jobs_order:
-            count = top3_job_car[top3_job_car['job_name'] == job].shape[0]
+            count = top3_job_car[top3_job_car["job_name"] == job].shape[0]
             offset_list.extend([offset_counter + i for i in range(count)])
             offset_counter += count + 4  # 간격
 
-        top3_job_car['offset'] = offset_list
+        top3_job_car["offset"] = offset_list
 
         # 직업명 레이블용 데이터
-        job_labels = top3_job_car.groupby('job_name').first().reset_index()[['job_name', 'offset']]
-
-        # Altair 시각화
-        labels_chart = alt.Chart(job_labels).mark_text(
-            align='right',
-            baseline='middle',
-            dx=-5,
-            fontSize=13,
-            fontWeight='bold'
-        ).encode(
-            y=alt.Y('offset:O', axis=None),
-            text='job_name:N'
-        ).properties(width=100)
-
-        bars = alt.Chart(top3_job_car).mark_bar(size=16).encode(
-            y=alt.Y('offset:O', axis=None),
-            x=alt.X('count:Q', title='추천 수'),
-            color=alt.Color('car_full_name:N', legend=None),
-            tooltip=[
-                alt.Tooltip('job_name:N', title='직업'),
-                alt.Tooltip('car_full_name:N', title='차량'),
-                alt.Tooltip('count:Q', title='추천 수')
-            ]
-        ).properties(width=600)
-
-        text_car = alt.Chart(top3_job_car).mark_text(
-            align='left',
-            baseline='middle',
-            dx=5,
-            fontSize=11
-        ).encode(
-            y='offset:O',
-            x='count:Q',
-            text='car_full_name:N'
+        job_labels = (
+            top3_job_car.groupby("job_name")
+            .first()
+            .reset_index()[["job_name", "offset"]]
         )
 
-        full_chart = alt.hconcat(labels_chart, bars + text_car).resolve_scale(y='shared')
+        # Altair 시각화
+        labels_chart = (
+            alt.Chart(job_labels)
+            .mark_text(
+                align="right", baseline="middle", dx=-5, fontSize=13, fontWeight="bold"
+            )
+            .encode(y=alt.Y("offset:O", axis=None), text="job_name:N")
+            .properties(width=100)
+        )
+
+        bars = (
+            alt.Chart(top3_job_car)
+            .mark_bar(size=16)
+            .encode(
+                y=alt.Y("offset:O", axis=None),
+                x=alt.X("count:Q", title="추천 수"),
+                color=alt.Color("car_full_name:N", legend=None),
+                tooltip=[
+                    alt.Tooltip("job_name:N", title="직업"),
+                    alt.Tooltip("car_full_name:N", title="차량"),
+                    alt.Tooltip("count:Q", title="추천 수"),
+                ],
+            )
+            .properties(width=600)
+        )
+
+        text_car = (
+            alt.Chart(top3_job_car)
+            .mark_text(align="left", baseline="middle", dx=5, fontSize=11)
+            .encode(y="offset:O", x="count:Q", text="car_full_name:N")
+        )
+
+        full_chart = alt.hconcat(labels_chart, bars + text_car).resolve_scale(
+            y="shared"
+        )
         st.altair_chart(full_chart, use_container_width=True)
 
 # 저작권 표시
-st.markdown("""
+st.markdown(
+    """
     <div class="copyright">
     Copyright 2025. Chageun. All rights reserved.
     </div>
-""", unsafe_allow_html=True) 
+""",
+    unsafe_allow_html=True,
+)

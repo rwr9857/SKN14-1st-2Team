@@ -1,12 +1,12 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import mysql.connector
-import base64
 import os
 from dotenv import load_dotenv
 
 # 환경변수 로드
 load_dotenv()
+
 
 # DB 연결 함수
 def team_db():
@@ -16,16 +16,18 @@ def team_db():
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             database=os.getenv("DB_NAME"),
-            charset=os.getenv("DB_CHARSET", "utf8mb4")
+            charset=os.getenv("DB_CHARSET", "utf8mb4"),
         )
         return conn
     except mysql.connector.Error as e:
         st.error(f"DB 연결 실패: {e}")
         return None
 
+
 # 스타일 설정
 def set_custom_styles():
-    st.markdown("""
+    st.markdown(
+        """
         <style>
         .stApp {
             background-color: white;
@@ -60,7 +62,10 @@ def set_custom_styles():
             border-top: 1px solid #eee;
         }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 # 직업 ID와 이름 매핑
 JOB_MAPPING = {
@@ -69,36 +74,38 @@ JOB_MAPPING = {
     "IT/개발": 3,
     "서비스직": 4,
     "생산직": 5,
-    "기타": 6
+    "기타": 6,
 }
+
 
 # 세션 상태 초기화
 def team_session():
     default_values = {
-        'age': 20,
-        'gender': None,
-        'job': None,
-        'job_id': None,  # 직업 ID 저장용
-        'purpose': None,
-        'min_val': 1000,
-        'max_val': 5000,
-        'fuel_type': None,
-        'body_type': None,
-        'first': None,
-        'second': None,
-        'third': None,
-        'recommend_cars': []
+        "age": 20,
+        "gender": None,
+        "job": None,
+        "job_id": None,  # 직업 ID 저장용
+        "purpose": None,
+        "min_val": 1000,
+        "max_val": 5000,
+        "fuel_type": None,
+        "body_type": None,
+        "first": None,
+        "second": None,
+        "third": None,
+        "recommend_cars": [],
     }
     for key, value in default_values.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
 
 # 페이지 설정
 st.set_page_config(page_title="차근차근 - 옵션 선택", layout="wide")
 set_custom_styles()
 
 # 로고 표시
-st.image("../../docs/차근차근 로고.png", width=180)
+st.image("./resource/차근차근 로고.png", width=180)
 
 # 세션 초기화
 team_session()
@@ -116,37 +123,62 @@ selected = option_menu(
         "icon": {"color": "#444", "font-size": "18px"},
         "nav-link": {"font-size": "16px", "text-align": "center", "margin": "5px"},
         "nav-link-selected": {"background-color": "#FFCC66"},
-    }
+    },
 )
 
 # 페이지 내용 업데이트
 if selected == "기본 정보":
     st.header("기본 정보")
     st.session_state.age = st.number_input("나이(세)", 20, 40, st.session_state.age)
-    st.session_state.gender = st.radio("성별", ["남", "여"], horizontal=True, index=["남", "여"].index(
-        st.session_state.gender) if st.session_state.gender else 0)
-    
+    st.session_state.gender = st.radio(
+        "성별",
+        ["남", "여"],
+        horizontal=True,
+        index=(
+            ["남", "여"].index(st.session_state.gender)
+            if st.session_state.gender
+            else 0
+        ),
+    )
+
     # 직업 선택 추가
     job_options = ["대학생", "사무직", "IT/개발", "서비스직", "생산직", "기타"]
-    st.session_state.job = st.selectbox("직업", 
+    st.session_state.job = st.selectbox(
+        "직업",
         job_options,
-        index=job_options.index(st.session_state.job) if st.session_state.job in job_options else 0
+        index=(
+            job_options.index(st.session_state.job)
+            if st.session_state.job in job_options
+            else 0
+        ),
     )
     # 선택된 직업의 ID 저장
     st.session_state.job_id = JOB_MAPPING[st.session_state.job]
-    
-    st.session_state.purpose = st.selectbox("주 사용 용도", ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"],
-                                            index=["출퇴근", "여행/나들이", "업무용", "주말 드라이브"].index(
-                                                st.session_state.purpose) if st.session_state.purpose else 0)
+
+    st.session_state.purpose = st.selectbox(
+        "주 사용 용도",
+        ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"],
+        index=(
+            ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"].index(
+                st.session_state.purpose
+            )
+            if st.session_state.purpose
+            else 0
+        ),
+    )
 
 elif selected == "예산 범위":
     st.markdown("### 차량 구매 예산")
     col1, col2 = st.columns([1, 1.3])
     with col1:
-        st.image("../../docs/예산_아이콘.png", width=100)
+        st.image("./resource/예산_아이콘.png", width=100)
     with col2:
         st.session_state.min_val, st.session_state.max_val = st.slider(
-            "구매 예산 범위 설정 (단위: 만 원)", 1000, 5000, (st.session_state.min_val, st.session_state.max_val), step=500
+            "구매 예산 범위 설정 (단위: 만 원)",
+            1000,
+            5000,
+            (st.session_state.min_val, st.session_state.max_val),
+            step=500,
         )
 
 elif selected == "연료 타입":
@@ -155,8 +187,11 @@ elif selected == "연료 타입":
         "원하는 연료 타입을 선택하세요",
         ["디젤", "가솔린", "하이브리드", "전기"],
         horizontal=True,
-        index=["디젤", "가솔린", "하이브리드", "전기"].index(
-            st.session_state.fuel_type) if st.session_state.fuel_type else 0
+        index=(
+            ["디젤", "가솔린", "하이브리드", "전기"].index(st.session_state.fuel_type)
+            if st.session_state.fuel_type
+            else 0
+        ),
     )
 
 elif selected == "바디타입":
@@ -165,7 +200,11 @@ elif selected == "바디타입":
         "선호하는 바디타입을 선택하세요",
         ["경차", "승용차", "SUV", "기타"],
         horizontal=True,
-        index=["경차", "승용차", "SUV", "기타"].index(st.session_state.body_type) if st.session_state.body_type else 0
+        index=(
+            ["경차", "승용차", "SUV", "기타"].index(st.session_state.body_type)
+            if st.session_state.body_type
+            else 0
+        ),
     )
 
 elif selected == "선호도":
@@ -176,27 +215,27 @@ elif selected == "선호도":
         "가격 (최저)",
         "평점 (네이버 평점 기준)",
         "차체 크기 (실내 공간 기준 = 축거/전장*100)",
-        "성능 (출력-최저)"
+        "성능 (출력-최저)",
     ]
     # 1순위 선택
-    first_priority = st.selectbox(
-        "🏆 1순위",
-        options=preference_options,
-        key="first"
-    )
+    first_priority = st.selectbox("🏆 1순위", options=preference_options, key="first")
 
     # 2순위 선택
     second_priority = st.selectbox(
         "🥈 2순위",
         options=[opt for opt in preference_options if opt != st.session_state.first],
-        key="second"
+        key="second",
     )
 
     # 3순위 선택
     third_priority = st.selectbox(
         "🥉 3순위",
-        options=[opt for opt in preference_options if opt not in (st.session_state.first, st.session_state.second)],
-        key="third"
+        options=[
+            opt
+            for opt in preference_options
+            if opt not in (st.session_state.first, st.session_state.second)
+        ],
+        key="third",
     )
 
     # 선택 결과 출력
@@ -205,40 +244,42 @@ elif selected == "선호도":
     st.write(f"2순위: **{st.session_state.second}**")
     st.write(f"3순위: **{st.session_state.third}**")
 
+
 # DB에 사용자 정보 저장
 def save_user_info():
     try:
         conn = team_db()
         if conn:
             cur = conn.cursor()
-            
+
             # user_info 테이블에 저장
             insert_user_query = """
             INSERT INTO teamdb.user_info 
             (USER_AGE, USER_GENDER, user_job, user_purpose)
             VALUES (%s, %s, %s, %s)
             """
-            
+
             user_values = (
                 st.session_state.age,
                 st.session_state.gender,
                 st.session_state.job_id,  # job_id 사용
-                st.session_state.purpose
+                st.session_state.purpose,
             )
-            
+
             cur.execute(insert_user_query, user_values)
             user_id = cur.lastrowid
-            
+
             conn.commit()
             conn.close()
-            
+
             # 세션에 user_id 저장
             st.session_state.user_id = user_id
             return user_id
-            
+
     except mysql.connector.Error as e:
         st.error(f"사용자 정보 저장 실패: {e}")
         return None
+
 
 # 모든 항목 완료 체크 및 다음 단계 버튼
 st.sidebar.markdown("---")
@@ -254,7 +295,7 @@ required_fields = [
     st.session_state.body_type,
     st.session_state.first,
     st.session_state.second,
-    st.session_state.third
+    st.session_state.third,
 ]
 
 if st.sidebar.button("다음 페이지로 이동"):
@@ -268,8 +309,11 @@ if st.sidebar.button("다음 페이지로 이동"):
         st.sidebar.error("⚠️ 모든 값을 입력 후 버튼을 눌러주세요.")
 
 # 저작권 표시
-st.markdown("""
+st.markdown(
+    """
     <div class="copyright">
     Copyright 2025. Chageun. All rights reserved.
     </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)

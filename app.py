@@ -1,21 +1,30 @@
 import streamlit as st
 import base64
 
+st.set_page_config(
+    page_title="차근차근",
+    layout="centered",
+    initial_sidebar_state="collapsed",
+)
+
 # 파일 경로
-background_image_path = "../../docs/background.png"
-logo_image_path = "../../docs/차근차근 로고.png"
+background_image_path = "./resource/background.png"
+logo_image_path = "./resource/차근차근 로고.png"
+
 
 # base64 인코딩 함수
 def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
+    with open(bin_file, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode()
+
 
 # 배경 및 로고 CSS
 def set_background_and_logo(bg_path, logo_path):
     bg_base64 = get_base64_of_bin_file(bg_path)
     logo_base64 = get_base64_of_bin_file(logo_path)
-    st.markdown(f"""
+    st.markdown(
+        f"""
         <style>
         .block-container {{
             max-width: 1200px !important;
@@ -88,19 +97,24 @@ def set_background_and_logo(bg_path, logo_path):
         }}
         </style>
         <img src="data:image/png;base64,{logo_base64}" class="custom-logo">
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 set_background_and_logo(background_image_path, logo_image_path)
 
 # 중앙 컨텐츠 (HTML+Streamlit 버튼)
-st.markdown("""
+st.markdown(
+    """
 <div class="center-box">
     <div class="main-title">당신의 첫 차,<br>차근차근 함께 찾아요</div>
     <div class="sub-title">나에게 맞는 첫 차를<br>3분 만에 찾아드립니다.</div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # 반드시 Streamlit 버튼으로!
 if st.button("찾으러 가기"):
     st.switch_page("pages/2_second_page.py")  # pages/second_page.py가 존재해야 함
-

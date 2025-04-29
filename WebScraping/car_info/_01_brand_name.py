@@ -7,27 +7,29 @@ def create_and_insert_table(unique_brand_names):
 
     # MySQL 데이터베이스 연결
     conn = mysql.connector.connect(
-        host='localhost',
-        user='skn14',
-        password='skn14',
-        database='teamdb'
+        host="localhost", user="skn14", password="skn14", database="teamdb"
     )
     cursor = conn.cursor()
 
     # 테이블 생성 (이미 존재하면 무시)
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS tbl_brand (
             brand_id INT AUTO_INCREMENT PRIMARY KEY,
             brand_name VARCHAR(255) UNIQUE
         )
-    ''')
+    """
+    )
 
     # unique_brand_names를 tbl_brand 테이블에 삽입
     for brand_name in unique_brand_names:
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO tbl_brand (brand_name) VALUES (%s)
-            ''', (brand_name,))
+            """,
+                (brand_name,),
+            )
         except mysql.connector.IntegrityError:
             # 이미 존재하는 브랜드 이름은 삽입하지 않음
             pass
@@ -51,7 +53,7 @@ def create_and_insert_table(unique_brand_names):
 
 def load_car_info():
     """car_info_list.pkl 파일에서 데이터를 불러오는 함수"""
-    with open('car_info_list.pkl', 'rb') as f:
+    with open("car_info_list.pkl", "rb") as f:
         car_info_list = pickle.load(f)
 
     return car_info_list

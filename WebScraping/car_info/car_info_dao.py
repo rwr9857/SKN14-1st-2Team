@@ -10,6 +10,7 @@ import re
 import time
 from WebScraping.car_info.car_info_dto import CarInfo
 
+
 class CarInfoDAO:
     def __init__(self):
         self.driver = webdriver.Chrome()
@@ -25,11 +26,17 @@ class CarInfoDAO:
         time.sleep(3)
 
     def apply_filters(self):
-        button = self.driver.find_element(By.XPATH, '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[1]/div/div/div/ul/li[5]/div/a')
+        button = self.driver.find_element(
+            By.XPATH,
+            '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[1]/div/div/div/ul/li[5]/div/a',
+        )
         button.click()
         time.sleep(2)
 
-        slider = self.driver.find_element(By.XPATH, '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[1]/div/div/div/div/div/div/div[2]/div[1]/div[3]/div/span/span[7]')
+        slider = self.driver.find_element(
+            By.XPATH,
+            '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[1]/div/div/div/div/div/div/div[2]/div[1]/div[3]/div/span/span[7]',
+        )
         slider.click()
         time.sleep(2)
 
@@ -38,24 +45,35 @@ class CarInfoDAO:
             actions.send_keys(Keys.ARROW_LEFT).perform()
         time.sleep(2)
 
-        apply = self.driver.find_element(By.XPATH, '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[1]/div/div/div/div/div/div/div[2]/div[2]/a')
+        apply = self.driver.find_element(
+            By.XPATH,
+            '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[1]/div/div/div/div/div/div/div[2]/div[2]/a',
+        )
         apply.click()
         time.sleep(2)
 
     def collect_urls(self):
         for page in range(1, 16):
             try:
-                container = self.driver.find_element(By.XPATH, f'//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[3]/div[' + str(page) + ']')
+                container = self.driver.find_element(
+                    By.XPATH,
+                    f'//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[3]/div['
+                    + str(page)
+                    + "]",
+                )
 
                 car_list = container.find_elements(By.CSS_SELECTOR, ".info_box")
 
                 for car_tag in car_list:
                     link = car_tag.find_element(By.CSS_SELECTOR, "a:first-of-type")
-                    href = link.get_attribute('href')
+                    href = link.get_attribute("href")
                     if href and href not in self.url_list:
-                        self.url_list.append(href + '%20%EC%A0%95%EB%B3%B4')
+                        self.url_list.append(href + "%20%EC%A0%95%EB%B3%B4")
 
-                next_button = self.driver.find_element(By.XPATH, '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[4]/div/a[2]')
+                next_button = self.driver.find_element(
+                    By.XPATH,
+                    '//*[@id="main_pack"]/div[3]/div[2]/div[1]/div/div[4]/div/a[2]',
+                )
                 next_button.click()
                 time.sleep(3)
 
@@ -65,14 +83,14 @@ class CarInfoDAO:
 
     def _get_text_from_dd(self, info_groups, index):
         if len(info_groups) > index:
-            dd_tag = info_groups[index].select_one('dd')
+            dd_tag = info_groups[index].select_one("dd")
             return dd_tag.text.strip() if dd_tag else None
         return None
 
     def _extract_first_number(self, text, return_float=False):
         if not text:
             return None
-        numbers = re.findall(r'\d+(?:\.\d+)?', text.replace(',', ''))
+        numbers = re.findall(r"\d+(?:\.\d+)?", text.replace(",", ""))
         if numbers:
             num = float(numbers[0])
             return round(num, 1) if return_float else int(num)
@@ -84,22 +102,28 @@ class CarInfoDAO:
                 self.driver.get(url)
 
                 WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, 'span.area_text_title strong._text'))
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "span.area_text_title strong._text")
+                    )
                 )
 
-                soup = bs(self.driver.page_source, 'html.parser')
+                soup = bs(self.driver.page_source, "html.parser")
 
-                model_name_tag = soup.select_one('span.area_text_title strong._text')
+                model_name_tag = soup.select_one("span.area_text_title strong._text")
                 model_name = model_name_tag.text.strip() if model_name_tag else None
 
-                sub_title_tags = soup.select('div.sub_title .txt')
-                body_type = sub_title_tags[0].text.strip() if len(sub_title_tags) > 0 else None
-                model_year = sub_title_tags[1].text.strip() if len(sub_title_tags) > 1 else None
+                sub_title_tags = soup.select("div.sub_title .txt")
+                body_type = (
+                    sub_title_tags[0].text.strip() if len(sub_title_tags) > 0 else None
+                )
+                model_year = (
+                    sub_title_tags[1].text.strip() if len(sub_title_tags) > 1 else None
+                )
 
-                image_tag = soup.select_one('div.detail_info a.thumb.type_87_87 img')
-                image_link = image_tag['src'] if image_tag else None
+                image_tag = soup.select_one("div.detail_info a.thumb.type_87_87 img")
+                image_link = image_tag["src"] if image_tag else None
 
-                info_groups = soup.select('dl.info .info_group')
+                info_groups = soup.select("dl.info .info_group")
 
                 price_text = self._get_text_from_dd(info_groups, 0)
                 price = self._extract_first_number(price_text)
@@ -107,16 +131,22 @@ class CarInfoDAO:
                 fuel_type = self._get_text_from_dd(info_groups, 1)
 
                 fuel_efficiency_text = self._get_text_from_dd(info_groups, 2)
-                fuel_efficiency = self._extract_first_number(fuel_efficiency_text, return_float=True)
+                fuel_efficiency = self._extract_first_number(
+                    fuel_efficiency_text, return_float=True
+                )
 
                 power_text = self._get_text_from_dd(info_groups, 3)
                 power = self._extract_first_number(power_text)
 
                 engine_type = None
                 if len(info_groups) > 6:
-                    engine_dd = info_groups[6].select_one('dd')
-                    engine_span = info_groups[6].select_one('span.value_text')
-                    engine_type = (engine_dd.text.strip() if engine_dd else '') + " " + (engine_span.text.strip() if engine_span else '')
+                    engine_dd = info_groups[6].select_one("dd")
+                    engine_span = info_groups[6].select_one("span.value_text")
+                    engine_type = (
+                        (engine_dd.text.strip() if engine_dd else "")
+                        + " "
+                        + (engine_span.text.strip() if engine_span else "")
+                    )
 
                 size = None
                 size_text1 = self._get_text_from_dd(info_groups, 9)
@@ -142,7 +172,7 @@ class CarInfoDAO:
                         size=size,
                         engine_type=engine_type,
                         image_link=image_link,
-                        brand=brand
+                        brand=brand,
                     )
                     self.car_info_list.append(car_info)
                     print(f"[{idx}] {car_info}")

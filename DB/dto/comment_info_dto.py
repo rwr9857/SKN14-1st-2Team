@@ -1,5 +1,7 @@
 class CommentDTO:
-    def __init__(self, review_id, nickname, comment_avg_score, comment_text, created_at):
+    def __init__(
+        self, review_id, nickname, comment_avg_score, comment_text, created_at
+    ):
         self.__review_id = review_id
         self.__nickname = nickname
         self.__comment_avg_score = comment_avg_score
@@ -47,8 +49,10 @@ class CommentDTO:
         self.__created_at = value
 
     def __str__(self):
-        return (f"CommentDTO(review_id={self.__review_id}, "
-                f"nickname={self.__nickname}, "
-                f"comment_avg_score={self.__comment_avg_score}, "
-                f"comment_text={self.__comment_text}, "
-                f"created_at={self.__created_at})")
+        return (
+            f"CommentDTO(review_id={self.__review_id}, "
+            f"nickname={self.__nickname}, "
+            f"comment_avg_score={self.__comment_avg_score}, "
+            f"comment_text={self.__comment_text}, "
+            f"created_at={self.__created_at})"
+        )

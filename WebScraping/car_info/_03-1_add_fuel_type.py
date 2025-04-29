@@ -7,18 +7,17 @@ def add_fuel_type():
 
     # MySQL 데이터베이스 연결
     conn = mysql.connector.connect(
-        host='localhost',
-        user='skn14',
-        password='skn14',
-        database='teamdb'
+        host="localhost", user="skn14", password="skn14", database="teamdb"
     )
     cursor = conn.cursor()
 
     # INSERT 쿼리 실행
-    cursor.execute('''
+    cursor.execute(
+        """
         INSERT INTO tbl_fuel_type (fuel_type_id, fuel_type)
         VALUES (10, '하이브리드')
-    ''')
+    """
+    )
 
     # 변경 사항 저장
     conn.commit()

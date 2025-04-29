@@ -38,7 +38,9 @@ class CarReviewDTO:
         self.__graph_info = value
 
     def __str__(self):
-        return (f"CarReviewDTO(car_name={self.__car_name}, "
-                f"avg_score={self.__avg_score}, "
-                f"survey_people_count={self.__survey_people_count}, "
-                f"graph_info={self.__graph_info})")
+        return (
+            f"CarReviewDTO(car_name={self.__car_name}, "
+            f"avg_score={self.__avg_score}, "
+            f"survey_people_count={self.__survey_people_count}, "
+            f"graph_info={self.__graph_info})"
+        )
