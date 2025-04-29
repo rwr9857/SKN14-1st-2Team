@@ -6,14 +6,48 @@
 
 ## 👥 팀원 소개
 
-|          캐릭터           | 이름  |    역할     | 담당 업무                                             |
-|:----------------------:|:-----:|:---------:|---------------------------------------------------|
-| ![](./docs/image2.png) | 김의령 | 프론트엔드,백엔드 | 리뷰데이터 수집 및 DB 생성, 피그마 페이지 설계 및 streamlit 세부 UI 수정 |
-| ![](./docs/image4.png) | 김준기 | 프론트엔드,백엔드 | 발표 및 팀원들 오류 해결                                    |
-| ![](./docs/image1.png) | 윤이서 |    백엔드    | 데이터 스크래핑 및 자동차정보 DB 생성                            |
-| ![](./docs/image5.png) | 조성렬 |   프론트엔드   | streamlit 구현 및 README 작성                          |
-| ![](./docs/image3.png) | 한성규 |   프론트엔드   | streamlit 구현                                      |
-
+<table border="1" style="border-collapse: collapse; text-align: center;">
+  <thead>
+    <tr>
+      <th style="padding: 10px;">캐릭터</th>
+      <th style="padding: 10px;">이름</th>
+      <th style="padding: 10px;">역할</th>
+      <th style="padding: 10px;">담당 업무</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img src="./docs/image2.png" width="200" style="display: block; margin: auto;"></td>
+      <td>김의령</td>
+      <td>프론트엔드, 백엔드</td>
+      <td>리뷰데이터 수집 및 DB 생성, 피그마 페이지 설계 및 streamlit 세부 UI 수정</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image4.png" width="200" style="display: block; margin: auto;"></td>
+      <td>김준기</td>
+      <td>프론트엔드, 백엔드</td>
+      <td>발표 및 팀원들 오류 해결</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image1.png" width="200" style="display: block; margin: auto;"></td>
+      <td>윤이서</td>
+      <td>백엔드</td>
+      <td>데이터 스크래핑 및 자동차정보 DB 생성</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image5.png" width="200" style="display: block; margin: auto;"></td>
+      <td>조성렬</td>
+      <td>프론트엔드</td>
+      <td>streamlit 구현 및 README 작성</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image3.png" width="200" style="display: block; margin: auto;"></td>
+      <td>한성규</td>
+      <td>프론트엔드</td>
+      <td>streamlit 구현</td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
@@ -53,13 +87,13 @@
 ## 2-2. 🛠️ 기술 스택
 
 
-| 분류      | 기술/도구                                                                                                                                                                                                                                                                                                                                                                                                                   |
-|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 언어      | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)                                                                                                                                                                                                                                                                                                                   |
+| 분류 | 기술도구 |
+|-----|--------|
+| 언어 | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) |
 | 데이터스크래핑 | ![Selenium](https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=selenium&logoColor=green),![BeautifulSoup](https://img.shields.io/badge/BeautifulSoup-CD5C5C?style=for-the-badge)|
-| 데이터베이스  | ![MySQL](https://img.shields.io/badge/MySQL-4B8BBE?style=for-the-badge&logo=mysql&logoColor=white)                                                                                                                                                                                                                                                                                                                      |
-| 웹       | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)                                                                                                                                                                                                                                                                                                          |
-| 협업 툴    | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white),![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white),![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white),![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) |
+| 데이터베이스 | ![MySQL](https://img.shields.io/badge/MySQL-4B8BBE?style=for-the-badge&logo=mysql&logoColor=white) |
+| 웹 | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white) |
+| 협업 툴 | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white),![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white),![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white),![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) |
 
 
 ## 2-3. 📝 요구사항 명세서
