@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 import plotly.graph_objects as go
+import altair as alt
 
 # 환경변수 로드
 load_dotenv()
@@ -267,6 +268,233 @@ def set_custom_styles():
         .review-button button:hover {
             background-color: #e5b43c !important;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+        .age-group-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .car-rank {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .rank-label {
+            font-weight: bold;
+            color: #02584B;
+            min-width: 30px;
+        }
+        .car-info {
+            flex-grow: 1;
+        }
+        .age-title {
+            color: #02584B;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #F6C248;
+        }
+        .car-rank-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .car-rank {
+            flex: 1;
+            text-align: center;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .car-image {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+        .age-column {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            height: 100%;
+        }
+        .car-rank {
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .rank-label {
+            font-weight: bold;
+            color: #02584B;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .car-info {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .car-image {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+        .age-title {
+            color: #02584B;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #F6C248;
+            text-align: center;
+        }
+        .age-row {
+            background-color: #EDF3F9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .age-label {
+            color: #02584B;
+            font-size: 28px;
+            font-weight: bold;
+            margin-right: 30px;
+            min-width: 80px;
+        }
+        .cars-container {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .car-list {
+            display: flex;
+            gap: 30px;
+            flex-grow: 1;
+        }
+        .car-item {
+            flex: 1;
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .car-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .car-rank {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #F6C248;
+            color: white;
+            padding: 3px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+  
+        .car-name {
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0 5px 0;
+            font-size: 15px;
+        }
+        .car-count {
+            color: #666;
+            font-size: 13px;
+        }
+        .rank-divider {
+            width: 30px;
+            height: 2px;
+            background-color: #ddd;
+            margin: 0 10px;
+        }
+        .age-stats-container {
+            background-color: #EDF3F9;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 20px;
+        }
+        .st-emotion-cache-16tyu1 h3 {
+            font-size: 1.2rem;
+            padding: 2rem 0px 1rem;
+        }
+        
+        p, ol, ul, dl {
+        
+        }
+        
+        .age-group-title {
+            color: #02584B;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .car-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+        .car-rank-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #F6C248;
+            color: white;
+            padding: 3px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .car-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin: 10px 0;
+        }
+        .car-title {
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0 5px 0;
+            font-size: 15px;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .car-count {
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+        }
+        .gender-stats-table {
+            font-size: 14px;
+            margin-top: 15px;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -882,8 +1110,228 @@ elif page == "리뷰와 평점":
             pagination_cols[-1].markdown("&nbsp;")
 
 elif page == "통계 정보":
-    st.header("통계 정보")
-    st.info("통계 기능은 추후 제공될 예정입니다.")
+    st.header("🚗 통계 정보")
+
+    def load_statistics():
+        conn = team_db()
+        if conn is None:
+            return pd.DataFrame()
+        try:
+            query = """
+                SELECT
+                    u.user_age,
+                    u.user_gender,
+                    j.job_name,
+                    c.car_full_name
+                FROM teamdb.car_recommendation_info r
+                JOIN teamdb.user_info u ON r.user_id = u.user_id
+                JOIN teamdb.car_info c ON r.car_id = c.car_id
+                LEFT JOIN teamdb.job_type_info j ON u.user_job = j.job_id
+            """
+            df = pd.read_sql(query, conn)
+            return df
+        except Exception as e:
+            st.error(f"통계 데이터 불러오기 실패: {e}")
+            return pd.DataFrame()
+        finally:
+            conn.close()
+
+    stats_df = load_statistics()
+
+    if stats_df.empty:
+        st.info("아직 추천받은 기록이 없습니다.")
+    else:
+        ### 연령별 통계
+        st.subheader("📊 연령대별 선호 차량 분석")
+        
+        # 연령대 그룹핑
+        stats_df['age_group'] = pd.cut(
+            stats_df['user_age'],
+            bins=[0, 29, 39, 49, 100],
+            labels=['20대', '30대', '40대', '50대 이상']
+        )
+
+        # 연령대별 데이터를 한 번에 처리
+        age_groups = ['20대', '30대', '40대']
+        
+        # 3개의 열 생성
+        cols = st.columns(3)
+        
+        for idx, age in enumerate(age_groups):
+            with cols[idx]:
+                age_data = stats_df[stats_df['age_group'] == age]
+                if not age_data.empty:
+                    st.markdown(f'''
+                        <div class="age-stats-container">
+                            <div class="age-group-title">{age}</div>
+                            <div style="display: flex; flex-direction: column; gap: 15px;">
+                    ''', unsafe_allow_html=True)
+                    
+                    # 상위 3개 차량 추출
+                    top_cars = (
+                        age_data.groupby('car_full_name')
+                        .size()
+                        .reset_index(name='count')
+                        .sort_values('count', ascending=False)
+                        .head(3)
+                    )
+
+                    for rank, (_, car) in enumerate(top_cars.iterrows(), 1):
+                        # 차량 이미지 URL 가져오기
+                        conn = team_db()
+                        car_img_url = None
+                        if conn:
+                            try:
+                                cur = conn.cursor(dictionary=True)
+                                cur.execute(
+                                    "SELECT car_img_url FROM teamdb.CAR_INFO WHERE car_full_name = %s LIMIT 1",
+                                    (car['car_full_name'],)
+                                )
+                                result = cur.fetchone()
+                                if result:
+                                    car_img_url = result['car_img_url']
+                            finally:
+                                conn.close()
+
+                        st.markdown(f'''
+                            <div class="car-card">
+                                <div class="car-rank-badge">
+                                    {rank}위
+                                </div>
+                                <img src="{car_img_url.strip() if car_img_url and car_img_url.strip().startswith('http') else '../../docs/대체이미지.png'}" 
+                                     class="car-image">
+                                <div class="car-title">
+                                    {car['car_full_name']}
+                                </div>
+                                <div class="car-count">
+                                    추천 수: {car['count']}건
+                                </div>
+                            </div>
+                        ''', unsafe_allow_html=True)
+
+                    st.markdown('''
+                            </div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+
+        ### 성별별 통계
+        st.subheader("📊 성별별 선호 차량")
+
+        # 성별 데이터를 한 번에 처리하기 위한 컬럼 생성
+        gender_cols = st.columns(2)
+        
+        genders = stats_df['user_gender'].dropna().unique()
+        for idx, gender in enumerate(genders):
+            with gender_cols[idx]:
+                gender_data = stats_df[stats_df['user_gender'] == gender]
+                if not gender_data.empty:
+                    top_cars = (
+                        gender_data.groupby('car_full_name')
+                        .size()
+                        .reset_index(name='count')
+                        .sort_values('count', ascending=False)
+                        .head(5)
+                    )
+
+                    st.markdown(f"#### {gender}")
+                    chart = alt.Chart(top_cars).mark_arc(innerRadius=50).encode(
+                        theta=alt.Theta('count:Q', title='추천 수'),
+                        color=alt.Color('car_full_name:N', title='차량명',
+                                      scale=alt.Scale(scheme='category20')),  # 색상 스키마 추가
+                        tooltip=['car_full_name:N', 'count:Q']
+                    ).properties(
+                        width=300,
+                        height=300,
+                        title=f"{gender} 선호 차량 TOP 5"
+                    )
+                    st.altair_chart(chart, use_container_width=True)
+
+                    # 상세 데이터 테이블 추가
+                    st.markdown("""
+                        <style>
+                        .gender-stats-table {
+                            font-size: 14px;
+                            margin-top: 15px;
+                        }
+                        </style>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown('<div class="gender-stats-table">', unsafe_allow_html=True)
+                    for idx, row in top_cars.iterrows():
+                        st.markdown(f"**{idx+1}위**: {row['car_full_name']} ({row['count']}건)")
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+        ### 직업별 통계
+        st.subheader("📊 직업별 선호 차량")
+
+        # 데이터 준비
+        jobs_order = ['대학생', '사무직', 'IT/개발', '서비스직', '생산직', '기타']
+
+        job_car = (
+            stats_df.groupby(['job_name', 'car_full_name'])
+            .size()
+            .reset_index(name='count')
+        )
+
+        top3_job_car = (
+            job_car.sort_values(['job_name', 'count'], ascending=[True, False])
+            .groupby('job_name')
+            .head(3)
+        )
+
+        # 직업명 순서 고정
+        top3_job_car['job_name'] = pd.Categorical(top3_job_car['job_name'], categories=jobs_order, ordered=True)
+        top3_job_car = top3_job_car.sort_values(['job_name'])
+
+        # offset 생성
+        offset_list = []
+        offset_counter = 0
+        for job in jobs_order:
+            count = top3_job_car[top3_job_car['job_name'] == job].shape[0]
+            offset_list.extend([offset_counter + i for i in range(count)])
+            offset_counter += count + 4  # 간격
+
+        top3_job_car['offset'] = offset_list
+
+        # 직업명 레이블용 데이터
+        job_labels = top3_job_car.groupby('job_name').first().reset_index()[['job_name', 'offset']]
+
+        # Altair 시각화
+        labels_chart = alt.Chart(job_labels).mark_text(
+            align='right',
+            baseline='middle',
+            dx=-5,
+            fontSize=13,
+            fontWeight='bold'
+        ).encode(
+            y=alt.Y('offset:O', axis=None),
+            text='job_name:N'
+        ).properties(width=100)
+
+        bars = alt.Chart(top3_job_car).mark_bar(size=16).encode(
+            y=alt.Y('offset:O', axis=None),
+            x=alt.X('count:Q', title='추천 수'),
+            color=alt.Color('car_full_name:N', legend=None),
+            tooltip=[
+                alt.Tooltip('job_name:N', title='직업'),
+                alt.Tooltip('car_full_name:N', title='차량'),
+                alt.Tooltip('count:Q', title='추천 수')
+            ]
+        ).properties(width=600)
+
+        text_car = alt.Chart(top3_job_car).mark_text(
+            align='left',
+            baseline='middle',
+            dx=5,
+            fontSize=11
+        ).encode(
+            y='offset:O',
+            x='count:Q',
+            text='car_full_name:N'
+        )
+
+        full_chart = alt.hconcat(labels_chart, bars + text_car).resolve_scale(y='shared')
+        st.altair_chart(full_chart, use_container_width=True)
 
 # 저작권 표시
 st.markdown("""

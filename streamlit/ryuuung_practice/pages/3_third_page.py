@@ -294,7 +294,7 @@ def set_custom_styles():
         </style>
         
         <div class="close-button-container">
-            <a href="4_fourth_page" class="close-button">×</a>
+            <a href="fourth_page" class="close-button">×</a>
         </div>
     """, unsafe_allow_html=True)
 
