@@ -309,7 +309,7 @@ elif st.session_state.page == "balance":
     # 페이지 내용 업데이트
     if selected == "기본 정보":
         st.header("기본 정보")
-        st.session_state.age = st.number_input("나이(세)", 20, 40, st.session_state.age)
+        st.session_state.age = st.number_input("나이(세)", 20, 49, st.session_state.age)
         st.session_state.gender = st.radio("성별", ["남", "여"], horizontal=True, index=["남", "여"].index(
             st.session_state.gender) if st.session_state.gender else 0)
         st.session_state.purpose = st.selectbox("주 사용 용도", ["출퇴근", "여행/나들이", "업무용", "주말 드라이브"],
@@ -1030,10 +1030,9 @@ def save_recommendation(user_id, car_id):
         conn.close()
 
 
-# --- 통계 정보 페이지 ---
+# --- 통계 페이지 시작 ---
 if st.session_state.page == "통계 정보":
     st.header("🚗 통계 정보")
-
 
     def load_statistics():
         conn = team_db()
@@ -1059,86 +1058,139 @@ if st.session_state.page == "통계 정보":
         finally:
             conn.close()
 
-
     stats_df = load_statistics()
 
     if stats_df.empty:
         st.info("아직 추천받은 기록이 없습니다.")
     else:
-        # ---------------------- 연령대별 ----------------------
-        st.subheader("📊 연령대별 선호 차량")
+        ### 연령별 통계
+        st.subheader("📊 연령대별 선호 차량 (Pie Chart)")
 
-        # 20대, 30대, 40대만 구간 설정
-        stats_df['age_group'] = pd.cut(stats_df['user_age'],
-                                       bins=[0, 29, 39, 49, 100],
-                                       labels=['20대', '30대', '40대', '기타'])
-        stats_df = stats_df[stats_df['age_group'].isin(['20대', '30대', '40대'])]
+        # 연령대 그룹
+        stats_df['age_group'] = pd.cut(
+            stats_df['user_age'],
+            bins=[0, 29, 39, 49, 100],
+            labels=['20대', '30대', '40대', '50대 이상']
+        )
 
-        age_car = stats_df.groupby(['age_group', 'car_full_name']).size().reset_index(name='count')
-        top_age_car = age_car.sort_values(['age_group', 'count'], ascending=[True, False]).groupby('age_group').head(1)
+        age_groups = ['20대', '30대', '40대']
+        for age in age_groups:
+            age_data = stats_df[stats_df['age_group'] == age]
+            if not age_data.empty:
+                top_cars = (
+                    age_data.groupby('car_full_name')
+                    .size()
+                    .reset_index(name='count')
+                    .sort_values('count', ascending=False)
+                    .head(3)
+                )
 
-        col1, col2 = st.columns(2)
-        with col1:
-            chart_age = alt.Chart(top_age_car).mark_bar().encode(
-                x=alt.X('age_group:N', title='연령대', axis=alt.Axis(labelAngle=0)),
-                y=alt.Y('count:Q', title='선호 차량 수'),
-                color='car_full_name:N',
-                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
-            ).properties(width=400, height=300)
-            st.altair_chart(chart_age, use_container_width=True)
-        with col2:
-            pie_age = alt.Chart(top_age_car).mark_arc().encode(
-                theta=alt.Theta(field='count', type='quantitative'),
-                color=alt.Color(field='car_full_name', type='nominal'),
-                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
-            ).properties(width=400, height=300)
-            st.altair_chart(pie_age, use_container_width=True)
+                st.markdown(f"#### {age}")
+                chart = alt.Chart(top_cars).mark_arc(innerRadius=50).encode(
+                    theta=alt.Theta('count:Q', title='추천 수'),
+                    color=alt.Color('car_full_name:N', title='차량명'),
+                    tooltip=['car_full_name:N', 'count:Q']
+                ).properties(width=300, height=300)
+                st.altair_chart(chart, use_container_width=True)
 
-        # ---------------------- 성별별 ----------------------
-        st.subheader("📊 성별별 선호 차량")
+        ### 성별별 통계
+        st.subheader("📊 성별별 선호 차량 (Pie Chart)")
 
-        gender_car = stats_df.groupby(['user_gender', 'car_full_name']).size().reset_index(name='count')
-        top_gender_car = gender_car.sort_values(['user_gender', 'count'], ascending=[True, False]).groupby(
-            'user_gender').head(3)
+        genders = stats_df['user_gender'].dropna().unique()
+        for gender in genders:
+            gender_data = stats_df[stats_df['user_gender'] == gender]
+            if not gender_data.empty:
+                top_cars = (
+                    gender_data.groupby('car_full_name')
+                    .size()
+                    .reset_index(name='count')
+                    .sort_values('count', ascending=False)
+                    .head(5)
+                )
 
-        col1, col2 = st.columns(2)
-        with col1:
-            chart_gender = alt.Chart(top_gender_car).mark_bar().encode(
-                x=alt.X('user_gender:N', title='성별', axis=alt.Axis(labelAngle=0)),
-                y=alt.Y('count:Q', title='선호 차량 수'),
-                color='car_full_name:N',
-                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
-            ).properties(width=400, height=300)
-            st.altair_chart(chart_gender, use_container_width=True)
-        with col2:
-            pie_gender = alt.Chart(top_gender_car).mark_arc().encode(
-                theta=alt.Theta(field='count', type='quantitative'),
-                color=alt.Color(field='car_full_name', type='nominal'),
-                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
-            ).properties(width=400, height=300)
-            st.altair_chart(pie_gender, use_container_width=True)
+                st.markdown(f"#### {gender}")
+                chart = alt.Chart(top_cars).mark_arc(innerRadius=50).encode(
+                    theta=alt.Theta('count:Q', title='추천 수'),
+                    color=alt.Color('car_full_name:N', title='차량명'),
+                    tooltip=['car_full_name:N', 'count:Q']
+                ).properties(width=300, height=300)
+                st.altair_chart(chart, use_container_width=True)
 
-        # ---------------------- 직업별 ----------------------
+        import altair as alt
+        import pandas as pd
+
         st.subheader("📊 직업별 선호 차량")
 
-        job_car = stats_df.groupby(['job_name', 'car_full_name']).size().reset_index(name='count')
-        # 직업이 있는 경우만 필터링
-        job_car = job_car[job_car['job_name'].notnull()]
-        top_job_car = job_car.sort_values(['job_name', 'count'], ascending=[True, False]).groupby('job_name').head(1)
+        # --- 데이터 준비 ---
+        # stats_df는 추천 데이터 (user + 추천 차량 데이터 조인한 것)
+        jobs_order = ['대학생', '사무직', 'IT/개발', '서비스직', '생산직', '기타']
 
-        col1, col2 = st.columns(2)
-        with col1:
-            chart_job = alt.Chart(top_job_car).mark_bar().encode(
-                x=alt.X('job_name:N', title='직업', axis=alt.Axis(labelAngle=0)),
-                y=alt.Y('count:Q', title='선호 차량 수'),
-                color='car_full_name:N',
-                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
-            ).properties(width=400, height=300)
-            st.altair_chart(chart_job, use_container_width=True)
-        with col2:
-            pie_job = alt.Chart(top_job_car).mark_arc().encode(
-                theta=alt.Theta(field='count', type='quantitative'),
-                color=alt.Color(field='car_full_name', type='nominal'),
-                tooltip=[alt.Tooltip('car_full_name', title='자동차명'), 'count']
-            ).properties(width=400, height=300)
-            st.altair_chart(pie_job, use_container_width=True)
+        job_car = (
+            stats_df.groupby(['job_name', 'car_full_name'])
+            .size()
+            .reset_index(name='count')
+        )
+
+        # 직업별 추천수 상위 3개만 가져오기
+        top3_job_car = (
+            job_car.sort_values(['job_name', 'count'], ascending=[True, False])
+            .groupby('job_name')
+            .head(3)
+        )
+
+        # offset 추가 (직업별 간격 벌리기)
+        offset_map = {}
+        offset_counter = 0
+        offset_list = []
+
+        for job in jobs_order:
+            subset = top3_job_car[top3_job_car['job_name'] == job]
+            for _ in subset.iterrows():
+                offset_list.append(offset_counter)
+            offset_counter += 4  # 3개 + 띄우기
+
+        top3_job_car['offset'] = offset_list
+
+        # --- Altair 그래프 생성 ---
+
+        # 1. 막대 그래프
+        bars = alt.Chart(top3_job_car).mark_bar(size=25).encode(
+            y=alt.Y('offset:O', axis=None),
+            x=alt.X('count:Q', title='추천 수'),
+            color=alt.Color('car_full_name:N', legend=None),
+            tooltip=[alt.Tooltip('job_name:N', title='직업명'), alt.Tooltip('car_full_name:N', title='차량명'), 'count']
+        )
+
+        # 2. 왼쪽에 직업명 표시
+        text_job = alt.Chart(top3_job_car).mark_text(
+            align='right',
+            baseline='middle',
+            dx=-10,
+            fontSize=14,
+            fontWeight='bold'
+        ).encode(
+            y='offset:O',
+            text=alt.Text('job_name:N')
+        )
+
+        # 3. 막대 끝에 차량명 표시
+        text_car = alt.Chart(top3_job_car).mark_text(
+            align='left',
+            baseline='middle',
+            dx=5,
+            fontSize=12
+        ).encode(
+            y='offset:O',
+            x='count:Q',
+            text=alt.Text('car_full_name:N')
+        )
+
+        # 4. 합치기
+        chart = (bars + text_job + text_car).properties(
+            width=800,
+            height=700
+        )
+
+        st.altair_chart(chart, use_container_width=True)
+
+
