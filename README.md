@@ -17,31 +17,31 @@
   </thead>
   <tbody>
     <tr>
-      <td><img src="./docs/image2.png" width="100" style="display: block; margin: auto;"></td>
+      <td><img src="./docs/image2.png" height="80" style="display: block; margin: auto;"></td>
       <td>김의령</td>
       <td>프론트엔드, 백엔드</td>
       <td>리뷰데이터 수집 및 DB 생성,<br>피그마 페이지 설계 및 Streamlit 세부 UI 수정</td>
     </tr>
     <tr>
-      <td><img src="./docs/image4.png" width="100" style="display: block; margin: auto;"></td>
+      <td><img src="./docs/image4.png" height="80" style="display: block; margin: auto;"></td>
       <td>김준기</td>
       <td>프론트엔드, 백엔드</td>
       <td>발표 및 팀원들 오류 해결</td>
     </tr>
     <tr>
-      <td><img src="./docs/image1.png" width="100" style="display: block; margin: auto;"></td>
+      <td><img src="./docs/image1.png" height="80" style="display: block; margin: auto;"></td>
       <td>윤이서</td>
       <td>백엔드</td>
       <td>데이터 스크래핑 및<br>자동차정보 DB 생성</td>
     </tr>
     <tr>
-      <td><img src="./docs/image5.png" width="100" style="display: block; margin: auto;"></td>
+      <td><img src="./docs/image5.png" height="80" style="display: block; margin: auto;"></td>
       <td>조성렬</td>
       <td>프론트엔드</td>
       <td>Streamlit 구현 및<br>README 작성</td>
     </tr>
     <tr>
-      <td><img src="./docs/image3.png" width="100" style="display: block; margin: auto;"></td>
+      <td><img src="./docs/image3.png" height="80" style="display: block; margin: auto;"></td>
       <td>한성규</td>
       <td>프론트엔드</td>
       <td>Streamlit 구현</td>
