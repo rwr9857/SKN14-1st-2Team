@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 import mysql.connector
 import os
 from dotenv import load_dotenv
+from styles.second_page import set_custom_styles
 
 # 환경변수 로드
 load_dotenv()
@@ -22,49 +23,6 @@ def team_db():
     except mysql.connector.Error as e:
         st.error(f"DB 연결 실패: {e}")
         return None
-
-
-# 스타일 설정
-def set_custom_styles():
-    st.markdown(
-        """
-        <style>
-        .stApp {
-            background-color: white;
-            min-height: 100vh;
-            position: relative;
-            padding-bottom: 60px;
-        }
-        .block-container {
-            max-width: calc(100% - 400px) !important;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        .st-emotion-cache-t1wise {
-            padding: 2rem 1rem 10rem;
-        }
-        .main-content {
-            margin-top: 20px;
-            padding-bottom: 60px;
-        }
-        .copyright {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            max-width: 1200px;
-            text-align: center;
-            padding: 1rem;
-            background-color: white;
-            color: #888;
-            font-size: 1em;
-            border-top: 1px solid #eee;
-        }
-        </style>
-    """,
-        unsafe_allow_html=True,
-    )
 
 
 # 직업 ID와 이름 매핑
