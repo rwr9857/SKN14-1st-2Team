@@ -28,3 +28,4 @@ if __name__ == "__main__":
     import pickle
     with open('car_info_list.pkl', 'wb') as f:
         pickle.dump(car_info_list, f)
+
