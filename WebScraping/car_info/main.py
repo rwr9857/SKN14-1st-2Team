@@ -1,4 +1,4 @@
-from DAO.car_info_dao import CarInfoDAO
+from WebScraping.car_info.car_info_dao import CarInfoDAO
 
 
 def main():
