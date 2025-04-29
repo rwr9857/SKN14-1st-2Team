@@ -9,6 +9,10 @@ import altair as alt
 # 환경변수 로드
 load_dotenv()
 
+LOGO_PATH = "./resource/차근차근 로고.png"
+# 리소스 없음.
+OTHER_IMG_PATH = "./resource/대체이미지.png"
+
 
 def get_star_rating(score):
     """
@@ -647,7 +651,7 @@ st.set_page_config(page_title="차근차근 - 차량 정보", layout="wide")
 set_custom_styles()
 
 # 로고 표시
-st.image("./resource/차근차근 로고.png", width=180)
+st.image(LOGO_PATH, width=180)
 
 # 사이드바 메뉴
 st.sidebar.title("메뉴")
@@ -726,7 +730,7 @@ if page == "차량 정보 조회":
                     ):
                         st.image(car["car_img_url"].strip(), use_container_width=True)
                     else:
-                        st.image("./resource/대체이미지.png", use_container_width=True)
+                        st.image(OTHER_IMG_PATH, use_container_width=True)
                     st.markdown(f"**{car['car_full_name']}**")
                     st.markdown(f"{car['car_price']}만원")
                     if st.button("세부정보", key=f"detail_{i}_{idx}"):
@@ -745,7 +749,7 @@ if page == "차량 정보 조회":
             if car["car_img_url"] and car["car_img_url"].strip().startswith("http"):
                 st.image(car["car_img_url"].strip(), width=300)
             else:
-                st.image("./resource/대체이미지.png", width=300)
+                st.image(OTHER_IMG_PATH, width=300)
 
         with col2:
             st.markdown(f"### {car.get('brand_name', '')} {car['car_full_name']}")
@@ -1023,7 +1027,7 @@ elif page == "리뷰와 평점":
                             f"""
                             <div class="image-wrapper">
                                 <div class="car-image-container">
-                                    <img src="./resource/대체이미지.png" alt="대체 이미지">
+                                    <img src=OTHER_IMG_PATH alt="대체 이미지">
                                 </div>
                             </div>
                         """,

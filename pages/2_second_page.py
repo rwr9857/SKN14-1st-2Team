@@ -8,6 +8,8 @@ from styles.second_page import set_custom_styles
 # 환경변수 로드
 load_dotenv()
 
+LOGO_PATH = "./resource/차근차근 로고.png"
+BUDGET_ICON_PATH = "./resource/예산_아이콘.png"
 
 # DB 연결 함수
 def team_db():
@@ -63,7 +65,7 @@ st.set_page_config(page_title="차근차근 - 옵션 선택", layout="wide")
 set_custom_styles()
 
 # 로고 표시
-st.image("./resource/차근차근 로고.png", width=180)
+st.image(LOGO_PATH, width=180)
 
 # 세션 초기화
 team_session()
@@ -129,7 +131,7 @@ elif selected == "예산 범위":
     st.markdown("### 차량 구매 예산")
     col1, col2 = st.columns([1, 1.3])
     with col1:
-        st.image("./resource/예산_아이콘.png", width=100)
+        st.image(BUDGET_ICON_PATH, width=100)
     with col2:
         st.session_state.min_val, st.session_state.max_val = st.slider(
             "구매 예산 범위 설정 (단위: 만 원)",

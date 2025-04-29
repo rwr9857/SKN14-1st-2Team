@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 # 환경변수 로드
 load_dotenv()
 
+LOGO_PATH = "./resource/차근차근 로고.png"
+# 리소스 없음.
+OTHER_IMG_PATH = "./resource/대체이미지.png"
 
 # DB 연결 함수
 def team_db():
@@ -306,7 +309,7 @@ st.set_page_config(page_title="차근차근 - 추천 결과", layout="wide")
 set_custom_styles()
 
 # 로고 표시
-st.image("./resource/차근차근 로고.png", width=180)
+st.image(LOGO_PATH, width=180)
 
 
 # 세션 상태 초기화
@@ -481,7 +484,7 @@ with st.container():
             ].strip().startswith("http"):
                 st.image(current_car["car_img_url"].strip(), width=500)
             else:
-                st.image("./resource/대체이미지.png", width=500)
+                st.image(OTHER_IMG_PATH, width=500)
             st.markdown("</div>", unsafe_allow_html=True)
 
         # 오른쪽 컬럼 - 정보
