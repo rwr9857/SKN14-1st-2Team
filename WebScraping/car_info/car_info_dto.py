@@ -14,3 +14,4 @@ class CarInfo:
     engine_type: str
     image_link: str
     brand: str
+
