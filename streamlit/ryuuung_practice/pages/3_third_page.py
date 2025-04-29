@@ -28,6 +28,7 @@ def team_db():
 def set_custom_styles():
     st.markdown("""
         <style>
+        
         .stApp {
             background-color: white;
             min-height: 100vh;
@@ -141,9 +142,27 @@ def set_custom_styles():
             border-radius: 5px;
             padding: 8px 16px;
             font-weight: bold;
-            width: 100%;
-          
+            width: 100%; 
         }
+        
+        .st-emotion-cache-ocsh0s {
+            min-height: 0rem;
+        }
+        .st-emotion-cache-180ybpv {
+            flex : 1;
+        }
+        
+        .st-emotion-cache-10c9vv9 {
+            display: flex;
+            background-color: #F6C248;
+            width: 30px;
+            height: 30px;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+        }
+       
+        
         .st-emotion-cache-16tyu1 a {
             color: WHITE !important;
             text-decoration: none !important;
