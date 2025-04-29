@@ -263,7 +263,7 @@ if st.sidebar.button("다음 페이지로 이동"):
         user_id = save_user_info()
         if user_id:
             st.sidebar.success("✅ 다음 페이지로 이동합니다!")
-            st.switch_page("pages/third_page.py")
+            st.switch_page("pages/3_third_page.py")
     else:
         st.sidebar.error("⚠️ 모든 값을 입력 후 버튼을 눌러주세요.")
 
