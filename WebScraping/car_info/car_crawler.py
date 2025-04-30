@@ -1,3 +1,9 @@
+import sys
+import os
+
+# 현재 파일의 경로에서 두 단계 상위 디렉토리 추가
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -11,7 +17,7 @@ import time
 from DTO.car_info_dto import CarInfo
 
 
-class CarInfoDAO:
+class CarCrawler:
     def __init__(self):
         self.driver = webdriver.Chrome()
         self.car_info_list = []
