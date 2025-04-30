@@ -13,12 +13,15 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      - ./DB/csv_data:/var/lib/mysql-files
       - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     command:
       --bind-address=0.0.0.0
       --lower_case_table_names=1
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_general_ci
+      --local-infile=1
+      --secure-file-priv=/var/lib/mysql-files
   
   streamlit:
     image: python:3.11
