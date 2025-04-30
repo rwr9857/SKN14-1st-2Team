@@ -6,13 +6,48 @@
 
 ## 👥 팀원 소개
 
-|          캐릭터           | 이름  |    역할     | 담당 업무                                             |
-|:----------------------:|:-----:|:---------:|---------------------------------------------------|
-| ![](./docs/image2.png) | 김의령 | 프론트엔드,백엔드 | 리뷰데이터 수집 및 DB 생성, 피그마 페이지 설계 및 streamlit 세부 UI 수정 |
-| ![](./docs/image4.png) | 김준기 | 프론트엔드,백엔드 | 발표 및 팀원들 오류 해결                                    |
-| ![](./docs/image1.png) | 윤이서 |    백엔드    | 데이터 스크래핑 및 자동차정보 DB 생성                            |
-| ![](./docs/image5.png) | 조성렬 |   프론트엔드   | streamlit 구현 및 README 작성                          |
-| ![](./docs/image3.png) | 한성규 |   프론트엔드   | streamlit 구현                                      |
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
+  <thead>
+    <tr>
+      <th style="padding: 10px; width: 120px; min-width: 50px">캐릭터</th>
+      <th style="padding: 10px; width: 100px;">이름</th>
+      <th style="padding: 10px; width: 160px;">역할</th>
+      <th style="padding: 10px; width: 320px;">담당 업무</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img src="./docs/image2.png" height="80" style="display: block; margin: auto;"></td>
+      <td>김의령</td>
+      <td>프론트엔드, 백엔드</td>
+      <td>리뷰데이터 수집 및 DB 생성,<br>피그마 페이지 설계 및 Streamlit 세부 UI 수정</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image4.png" height="80" style="display: block; margin: auto;"></td>
+      <td>김준기</td>
+      <td>프론트엔드, 백엔드</td>
+      <td>발표 및 팀원들 오류 해결</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image1.png" height="80" style="display: block; margin: auto;"></td>
+      <td>윤이서</td>
+      <td>백엔드</td>
+      <td>데이터 스크래핑 및<br>자동차정보 DB 생성</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image5.png" height="80" style="display: block; margin: auto;"></td>
+      <td>조성렬</td>
+      <td>프론트엔드</td>
+      <td>Streamlit 구현 및<br>README 작성</td>
+    </tr>
+    <tr>
+      <td><img src="./docs/image3.png" height="80" style="display: block; margin: auto;"></td>
+      <td>한성규</td>
+      <td>프론트엔드</td>
+      <td>Streamlit 구현</td>
+    </tr>
+  </tbody>
+</table>
 
 
 ---
@@ -103,7 +138,10 @@
 
 # 3. 💡 사용 방법
 
-### streamlit 링크:https://youtu.be/I3xvUR2EuGQ?feature=shared
+https://github.com/user-attachments/assets/6184acde-6976-4342-a1a9-b903a736e301
+
+
+### [시연 영상 youtube 링크](https://youtu.be/I3xvUR2EuGQ)
 
 ---
 
