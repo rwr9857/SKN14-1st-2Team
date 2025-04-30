@@ -139,7 +139,11 @@
 
 # 3. 💡 사용 방법
 
-### streamlit 링크:https://youtu.be/I3xvUR2EuGQ?feature=shared
+
+https://github.com/user-attachments/assets/6184acde-6976-4342-a1a9-b903a736e301
+
+
+### [시연 영상 youtube 링크](https://youtu.be/I3xvUR2EuGQ)
 
 ---
 
