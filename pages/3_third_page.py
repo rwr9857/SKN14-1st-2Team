@@ -8,7 +8,7 @@ from styles.third_page import set_custom_styles
 # 환경변수 로드
 load_dotenv()
 
-LOGO_PATH = "./resource/차근차근 로고.png"
+LOGO_PATH = "./resource/logo.png"
 # 리소스 없음.
 OTHER_IMG_PATH = "./resource/대체이미지.png"
 

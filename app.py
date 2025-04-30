@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 BACKGROUND_PATH = "./resource/background.png"
-LOGO_PATH = "./resource/차근차근 로고.png"
+LOGO_PATH = "./resource/logo.png"
 
 # 이미지 불러오기
 bg_b64 = get_base64_image(BACKGROUND_PATH)

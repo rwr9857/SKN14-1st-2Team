@@ -4,8 +4,8 @@ from DAO.user_info import UserInfoDAO
 from styles.second_page import set_custom_styles
 
 
-LOGO_PATH = "./resource/차근차근 로고.png"
-BUDGET_ICON_PATH = "./resource/예산_아이콘.png"
+LOGO_PATH = "./resource/logo.png"
+BUDGET_ICON_PATH = "./resource/budget_icon.png"
 
 dao = UserInfoDAO()
 
