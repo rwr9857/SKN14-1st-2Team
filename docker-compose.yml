@@ -19,3 +19,25 @@ services:
       --lower_case_table_names=1
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_general_ci
+  
+  streamlit:
+    image: python:3.11
+    container_name: streamlit
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8501:8501"
+    command: >
+      sh -c "
+        pip install --no-cache-dir -r requirements.txt &&
+        streamlit run app.py --server.port=8501 --server.enableCORS=false
+      "
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
