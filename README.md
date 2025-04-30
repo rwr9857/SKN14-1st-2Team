@@ -9,7 +9,7 @@
 <table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
   <thead>
     <tr>
-      <th style="padding: 10px; width: 120px;">캐릭터</th>
+      <th style="padding: 10px; width: 120px; min-width: 50px">캐릭터</th>
       <th style="padding: 10px; width: 100px;">이름</th>
       <th style="padding: 10px; width: 160px;">역할</th>
       <th style="padding: 10px; width: 320px;">담당 업무</th>
