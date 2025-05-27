@@ -139,10 +139,6 @@
 
 # 3. 💡 사용 방법
 
-https://github.com/user-attachments/assets/6184acde-6976-4342-a1a9-b903a736e301
-
-
-### [시연 영상 youtube 링크](https://youtu.be/I3xvUR2EuGQ)
 
 https://github.com/user-attachments/assets/6184acde-6976-4342-a1a9-b903a736e301
 
